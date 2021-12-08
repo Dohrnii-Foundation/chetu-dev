@@ -1,0 +1,346 @@
+swagger: "2.0"
+info:
+  description: "Use basePath of https://dohrniifoundationi2-qa.chetu.com/v1"
+  version: "v1"
+  title: "Mobile and Web app REST API"
+  contact:
+    email: "amity3@chetu.com"
+host: "dohrniifoundationi2-qa.chetu.com"
+basePath: "/v1"
+tags:
+- name: "authentication"
+  description: "User Management Operations"
+  externalDocs:
+    description: "For Full Dohrnii Mobile Admin"
+    url: "https://admin.dohrniifoundation.com"
+- name: "wallet"
+  description: "Wallet Operations"
+  externalDocs:
+    # description: "For Full Dohrnii Mobile Admin"
+    # url: "http://admin.dohrniifoundation.com"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /authentication/seed:
+    post:
+      tags:
+        - "authentication"
+      summary: "Generate Random Seed Phrases"
+      description: "This can only be done by the logged in user."
+      operationId: "seed"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+            
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+           type: array
+           properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+                  name:
+                    type: string
+                    example: Jessica 
+            
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "User"
+  /authentication/validateSeed:
+    post:
+      tags:
+        - "authentication"
+      summary: "Validate seed phrases"
+      description: "This can only be done by the logged in user."
+      operationId: "validateSeed"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "seedId"
+          description: "seedId"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "seedPhrases"
+          description: "seedPhrases"
+          required: true
+          type: "array"   
+      responses:
+        "200":
+          description: "Seed Verified"   
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "User"
+  /authentication/saveSeedPhrase:
+    post:
+      tags:
+        - "authentication"
+      summary: "Save seedPhrase"
+      description: "This can only be done by the logged in user."
+      operationId: "saveSeedPhrase"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "imei1"
+          description: "imei1"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "imei2"
+          description: "imei2"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "deviceName"
+          description: "deviceName"
+          required: true
+          type: "string" 
+        - in: "body"
+          name: "deviceName"
+          description: "deviceName"
+          required: true
+          type: "string"   
+        - in: "body"
+          name: "seedPhrases"
+          description: "seedPhrases"
+          required: true
+          type: "array"   
+      responses:
+        "200":
+          description: "Seed Verified"   
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "User"
+  /wallet/create:
+    post:
+      tags:
+        - "wallet"
+      summary: "Create Wallet"
+      description: "This can only be done by the logged in user."
+      operationId: "create"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "walletName"
+          description: "walletName"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "seedId"
+          description: "seedId"
+          required: true
+          type: "string" 
+      responses:
+        "200":
+          description: "Wallet Create Successfully" 
+          schema: 
+              type: object
+        properties:
+           walletAddress:
+                     type: string
+                     example: 0xAb349799a3501660C00Bf63117f5C7eFdA338b14 
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "Wallet"
+  /wallet/transfertoken:
+    post:
+      tags:
+        - "wallet"
+      summary: "Transaction of token"
+      description: "This can only be done by the logged in user."
+      operationId: "transfertoken"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "walletAddressTo"
+          description: "walletAddress of receiver"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "walletAddressTo"
+          description: "walletAddress of sender"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "amount"
+          description: "transaction amount"
+          required: true
+          type: "integer" 
+          format: int64
+          example: 1 
+      responses:
+        "200":
+          description: "Amount Transfer Successfully" 
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "Wallet"
+  /wallet/walletdetail:
+    post:
+      tags:
+        - "wallet"
+      summary: "Fetch Wallet Detail"
+      description: "This can only be done by the logged in user."
+      operationId: "walletdetail"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "walletAddress"
+          description: "walletAddress "
+          required: true
+          type: "string"
+        - in: "body"
+          name: "seedId"
+          description: "seedId"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Amount Transfer Successfully" 
+          schema:
+            type: object
+              properties:
+                  walletAddress:
+                    type: string
+                    example: 0xAb349799a3501660C00Bf63117f5C7eFdA338b14
+                  walletName:
+                    type: string
+                    example: myWallet 
+                  qrCode:
+                    type: string
+                    example: ethereum:0xAb349799a3501660C00Bf63117f5C7eFdA338b14?value=1&gas=4200 
+                  amount:
+                    type: string
+                    format: int64
+                    example: 100   
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+      x-swagger-router-controller: "Wallet"   
+  /wallet/walletlist:
+   post:
+    tags:
+      - "wallet"
+    summary: "Fetch Wallet List"
+    description: "This can only be done by the logged in user."
+    operationId: "walletlist"
+    consumes:
+     - "application/json"
+    parameters:
+        - in: "body"
+          name: "seedId"
+          description: "seedId"
+          required: true
+          type: "string"
+   responses:
+        "200":
+          description: "Fetch Successfully" 
+          schema:
+            type: array
+              properties:
+                  walletAddress:
+                    type: string
+                    example: 0xAb349799a3501660C00Bf63117f5C7eFdA338b14
+                  walletName:
+                    type: string
+                    example: myWallet 
+                  qrCode:
+                    type: string
+                    example: ethereum:0xAb349799a3501660C00Bf63117f5C7eFdA338b14?value=1&gas=4200
+                  balance:
+                    type: integer
+                    format: int64
+                    example: 100  
+        "400":
+          description: "Invalid information supplied"
+        "404":
+          description: "Not found"
+        x-swagger-router-controller: "Wallet"  
+  /wallet/transactionhistory:
+   post:
+    tags:
+      - "wallet"
+   summary: "Fetch Successfully"
+   description: "This can only be done by the logged in user."
+   operationId: "transactionhistory"
+   consumes:
+     - "application/json"
+   parameters:
+        - in: "body"
+          name: "walletAddress"
+          description: "walletAddress" 
+          required: true
+          type: "string"
+        - in: "body"
+          name: "transactionType"
+          description: "transactionType" 
+          required: true
+          type: "string" 
+   responses:
+        "200":
+          description: "Fetch Successfully" 
+          schema:
+            type: array
+              properties:
+               walletAddressTo:
+                    type: string
+                    example: "0xAb349799a3501660C00Bf63117f5C7eFdA338b14"
+               walletAddressFrom:
+                    type: string
+                    example: "0xAb349799a3501660C00Bf63117f5C7eFdA338b14"
+               seedIdTo:
+                    type: string
+                    example: 619e04bf64222780742a531c 
+               seedIdFrom:
+                    type: string
+                    example: 619e3378aee6a913309573f2     
+               amount:
+                    type: integer
+                    format: int64
+                    example: 100
+               transactionType:
+                    type: string
+                    example: Send 
+               coinName:
+                    type: string
+                    example: Etherium
+               date:
+                    type: string
+                    example: "2021-11-25T10:28:30.264+00:00"            
+        "202":
+          description: "Invalid Wallet Address"
+        "404":
+          description: "Not found"
+        x-swagger-router-controller: "Wallet"        
+
+   

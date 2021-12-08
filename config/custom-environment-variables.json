@@ -1,0 +1,7 @@
+{
+  "dbConfig": {
+    "host": "prod-db-server",
+    "userName": "dnh",
+    "password": "dnh_db_password"
+  }
+}

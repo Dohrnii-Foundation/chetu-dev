@@ -1,0 +1,6 @@
+{
+  "name": "DOHRNII WALLET - Production",
+  "dbConfig": {
+    "host": "prod-db-server"
+  }
+}

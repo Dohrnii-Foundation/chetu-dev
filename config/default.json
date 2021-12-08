@@ -1,0 +1,9 @@
+{
+  "name": "DOHRNII WALLET",
+  "dbConfig": {
+    "host": "",
+    "dbName": "",
+    "userName": "",
+    "password": ""
+  }
+}

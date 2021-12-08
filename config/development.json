@@ -1,0 +1,11 @@
+{
+  "name": "DOHRNII WALLET - Developement",
+  "dbConfig": {
+    "host": "mongo.ju8uq.mongodb.net",
+    "dbName": "dohrnii-db",
+    "userName": "dohrnii",
+    "password": "wq2pkXwAsDt2IWsc"
+  },
+  "secretKey":"DOHRNII WALLET$@#&123$^*"
+
+}

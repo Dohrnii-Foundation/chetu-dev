@@ -1,0 +1,15 @@
+module.exports = {
+  SEED_CREATED: "24 random seed phrases is created",
+  SEED_ALREADY_EXIT_WITH_DEVICE_INFO:
+    "Seed Phrases already exist for this device.",
+  SEED_NOT_VERIFIED: "Seed not verified",
+  SEED_VERIFIED: "Seed verified successfully",
+  INVALID_WALLET_ADDRESS: "Invalid Wallet Address",
+  INSUFFICIENT_BALANCE: "Insufficient balance",
+  WALLET_CREATED_SUCCESSFULLY: "Wallet created successfully",
+  INVALID_SEED_ID: "Invalid Seed id",
+  FETCH_SUCCESSFULLY: "Fetch Successfully",
+  AMOUNT_TRANSFER_SUCCESSFULLY: "Amount transfer successfully",
+  INVALID_TRANSACTION_TYPE:"Invalid transactionType",
+  NO_RECORD_FOUND:"No record found"
+};
