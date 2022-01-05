@@ -17,7 +17,7 @@ app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument, options));
 
 app.use("/v1/authentication", require("./routes/authentication"));
 app.use("/v1/wallet", require("./routes/wallet"));
-
+app.use("/v1/web3", require("./routes/web3"));
 
 
 

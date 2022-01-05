@@ -27,7 +27,9 @@
     "mongoose": "^6.0.12",
     "qrcode": "^1.5.0",
     "swagger-ui-express": "^4.1.6",
-    "web3": "^1.6.0",
+    "thor-devkit": "^2.0.4",
+    "thorify": "^1.5.7",
+    "web3": "^1.0.0-beta.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
