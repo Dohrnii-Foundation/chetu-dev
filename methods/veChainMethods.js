@@ -1,6 +1,8 @@
 const { thorify } = require('thorify');
 const Web3 = require('web3');
-const web3 = thorify(new Web3(), "https://testnet.veblocks.net/"); // veChain test network
+// const web3 = thorify(new Web3(), "https://testnet.veblocks.net/"); // veChain test network
+ const web3 = thorify(new Web3(), "https://sync-testnet.vechain.org/"); // veChain test network
+//const web3 = thorify(new Web3(), "https://sync-testnet.veblocks.net/") // veChain test network
 //const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
 const fs = require('fs');
 const contractAbiVECHAIN = JSON.parse(fs.readFileSync("VeChainToken.json",'utf8'));
@@ -23,7 +25,7 @@ module.exports.veChainMethod = async (req) => {
   console.log('data;;;;',data)
     const clauses = [
       {
-        from: '0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920',
+       // from: '0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920',
         to: '0xEB48fB3443152Adb8C74068e4a117BeaE117a613',
         value: 10,
         data: data
