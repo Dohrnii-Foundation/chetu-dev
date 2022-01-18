@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vechain/connex-driver": "^2.0.8",
+    "@vechain/connex-framework": "^2.0.8",
     "bip32": "^2.0.6",
     "bip39": "^3.0.4",
     "bitcoinjs-lib": "^5.2.0",
@@ -29,7 +31,7 @@
     "swagger-ui-express": "^4.1.6",
     "thor-devkit": "^2.0.4",
     "thorify": "^1.5.7",
-    "web3": "^1.0.0-beta.1",
+    "web3": "^1.0.0-beta.31",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
