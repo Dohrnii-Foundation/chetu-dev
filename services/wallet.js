@@ -180,10 +180,21 @@ module.exports.walletDetail = async (req) => {
       message: message.INVALID_SEED_ID,
     };
 
-  let walletDetail = await WalletAddress.find({
-    seedId: options.seedId,
-    walletAddress: options.walletAddress
-  });
+   let walletDetail = await WalletAddress.aggregate([
+        {
+          $match:
+          {'walletAddress': options.walletAddress, }
+        },
+        {
+        $lookup:
+         {
+        from: 'tokens',
+        localField: 'walletAddress',
+        foreignField:'walletAddress',
+        as: 'tokenData'
+         }
+        },
+      ])
    if(walletDetail.length == 0)
    return {
     result: true,
@@ -198,15 +209,15 @@ module.exports.walletDetail = async (req) => {
     walletName: walletDetail[0].walletName,
     qrCode: walletDetail[0].qrCode,
     balance: walletDetail[0].balance,
-    data: [
-      {
-        coinIcon: walletDetail[0].coinIcon,
-        coinName: walletDetail[0].coinName,
-        coinShortName: walletDetail[0].coinShortName,
-        coinValue: walletDetail[0].coinValue,
-        coinUsdValue: walletDetail[0].coinUsdValue,
-      },
-    ],
+   data: walletDetail[0].tokenData.map((el) => {
+    return {
+        coinIcon: el.coinIcon,
+        coinName: el.coinName,
+        coinShortName: el.coinShortName,
+        coinValue: el.coinValue,
+        coinUsdValue: el.coinUsdValue
+    }
+  })
   };
 };
 /********** Fetch Wallet List ************
