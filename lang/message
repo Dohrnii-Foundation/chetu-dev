@@ -11,5 +11,6 @@ module.exports = {
   FETCH_SUCCESSFULLY: "Fetch Successfully",
   AMOUNT_TRANSFER_SUCCESSFULLY: "Amount transfer successfully",
   INVALID_TRANSACTION_TYPE:"Invalid transactionType",
-  NO_RECORD_FOUND:"No record found"
+  NO_RECORD_FOUND:"No record found",
+  INVALID_SEED:"Invalid Seed"
 };

@@ -12,6 +12,10 @@ const Seed = mongoose.model(
       type: String,
       default: "N",
     },
+    seedString:{
+      type: String,
+      required: true
+    },
     date: {
       type: Date,
       default: Date.now,

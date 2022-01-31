@@ -9,7 +9,7 @@ const { VerifiedSeed, validateRequest } = require("../models/verifiedseed");
  *
  ********************* Generate Random Seed Pharse **********************/
 module.exports.generateRandomSeeds = async () => {
-  const seedStr = bip39.generateMnemonic(256);
+  const seedStr = bip39.generateMnemonic(256)
   const seedArr = seedStr.split(" ");
   const modifiedArr = seedArr.map((el, i) => {
     return {
@@ -17,9 +17,9 @@ module.exports.generateRandomSeeds = async () => {
       val: el,
     };
   });
-
   let seed = new Seed({
     seedPhrases: modifiedArr,
+    seedString: seedStr
   });
   let { seedPhrases, _id, isVerified, date } = await seed.save();
 

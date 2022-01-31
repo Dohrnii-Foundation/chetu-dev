@@ -38,26 +38,6 @@ const WalletAddress = mongoose.model(
       type: Number,
       default: 0,
     },
-    coinIcon: {
-      type: String,
-      default: "",
-    },
-    coinName: {
-      type: String,
-      required: true,
-    },
-    coinShortName: {
-      type: String,
-      required: true,
-    },
-    coinValue: {
-      type: Number,
-      default: 0,
-    },
-    coinUsdValue: {
-      type: Number,
-      default: 0,
-    },
     date: {
       type: Date,
       default: Date.now,

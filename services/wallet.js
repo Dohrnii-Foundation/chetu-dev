@@ -1,8 +1,8 @@
-const Web3 = require("web3");
 const message = require("../lang/message");
 const EthereumQRPlugin = require("ethereum-qr-code");
 const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload } = require("../models/walletAddress");
 const { validateTransferPayload } = require("../models/transactionHistory");
+const { Token } = require("../models/token");
 const debug = require("debug")("app:walletlog");
 const {
   TransactionHistory,
@@ -11,7 +11,8 @@ const {
 const { Seed } = require("../models/seed");
 const CryptoJS = require("crypto-js");
 const config = require("config");
-
+const ethers = require('ethers');
+const bip39 = require("bip39");
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -28,32 +29,61 @@ module.exports.createWalletByBSC = async (req) => {
   });
   if (seed.length === 0)
     return { result: false, status: 202, message: message.SEED_NOT_VERIFIED };
-
-  const web3 = new Web3("https://data-seed-prebsc-1-s1.binance.org:8545");
-  const { address,privateKey } = web3.eth.accounts.create();
-  let encryptedKey = CryptoJS.AES.encrypt(privateKey,config.get('secretKey') ).toString();
-  let code = await generateQrCode(address);
+    if(bip39.validateMnemonic(seed[0].seedString)==false){
+      return {result: false, status: 202, message: message.INVALID_SEED }
+    }
+    let mnemonicWallet = ethers.Wallet.fromMnemonic(seed[0].seedString);
+ // let encryptedKey = CryptoJS.AES.encrypt(privateKey,config.get('secretKey') ).toString();
+  let code = await generateQrCode(mnemonicWallet.address);
   let walletAddress = new WalletAddress({
     imei1: options.imei1,
     imei2: options.imei2,
     deviceName: options.deviceName,
     seedId: options.seedId,
     walletName:options.walletName,
-    walletAddress: address,
-    privateKey: encryptedKey,
-    qrCode: code,
-    coinName: "Etherium",
-    coinShortName: "ETH",
-    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/ether.PNG"
+    walletAddress: mnemonicWallet.address,
+    privateKey: mnemonicWallet.privateKey,
+    qrCode: code, 
   });
   const value = await walletAddress.save();
+     // create default Tokens
+       await Token.insertMany([
+     {
+    coinName: "Etherium",
+    coinShortName: "ETH",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/ether.PNG",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address
+  },
+  {
+    coinName: "VeChain",
+    coinShortName: "VET",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/veChain.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address
+  },
+  {
+    coinName: "VeThor Token",
+    coinShortName: "VTHO",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/veThor.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address
+  },
+  {
+    coinName: "Dohrnii Coin",
+    coinShortName: "DHN",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address
+  }
+  ]);
   return {
     result: true,
     status: 200,
     message: message.WALLET_CREATED_SUCCESSFULLY,
-    walletAddress: address,
-    walletName:value.walletName,
-    privateKey:value.privateKey,
+    walletAddress: mnemonicWallet.address,
+    walletName: value.walletName,
+    privateKey: value.privateKey,
     qrCode: code,
     balance: 0
   };
