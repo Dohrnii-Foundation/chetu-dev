@@ -22,7 +22,7 @@ const WalletAddress = mongoose.model(
       required: true,
       unique: true
     },
-    privateKey:{
+    privateKey: {
       type: String,
       required: true
     },

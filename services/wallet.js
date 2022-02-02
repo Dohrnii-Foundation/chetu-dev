@@ -49,7 +49,7 @@ module.exports.createWalletByBSC = async (req) => {
      // create default Tokens
        await Token.insertMany([
      {
-    coinName: "Etherium",
+    coinName: "Ethereum",
     coinShortName: "ETH",
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/ether.PNG",
     seedId: options.seedId,
@@ -315,8 +315,6 @@ module.exports.walletTransactionHistory = async (req) => {
                 "_id": el._id,
             "walletAddressTo": el.walletAddressTo,
             "walletAddressFrom": el.walletAddressFrom,
-            "seedIdTo": el.seedIdTo,
-            "seedIdFrom": el.seedIdFrom,
             "amount": el.amount,
             "transactionType": el.walletAddressFrom == options.walletAddress ? 'Send' : 'Receive',
             "coinName": el.coinName,

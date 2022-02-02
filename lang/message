@@ -12,5 +12,7 @@ module.exports = {
   AMOUNT_TRANSFER_SUCCESSFULLY: "Amount transfer successfully",
   INVALID_TRANSACTION_TYPE:"Invalid transactionType",
   NO_RECORD_FOUND:"No record found",
-  INVALID_SEED:"Invalid Seed"
+  INVALID_SEED:"Invalid Seed",
+  INVALID_COIN_SHORT_NAME: "Invalid CoinShortName",
+  INVALID_BLOCK_CHAIN: "Invalid BlockChain"
 };

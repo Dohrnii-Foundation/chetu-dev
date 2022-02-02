@@ -32,12 +32,22 @@ const TransactionHistory = mongoose.model(
     },
   })
 );
-
 function validateTransfer(request) {
   let { error } = Joi.object({
     walletAddressTo: Joi.string().required(),
     walletAddressFrom: Joi.string().required(),
     amount: Joi.number().required(),
+  }).validate(request);
+
+  return error;
+}
+function validateVechainTransfer(request) {
+  let { error } = Joi.object({
+    walletAddressTo: Joi.string().required(),
+    walletAddressFrom: Joi.string().required(),
+    amount: Joi.number().required(),
+    coinShortName: Joi.string().required(),
+    blockChain: Joi.string()
   }).validate(request);
 
   return error;
@@ -53,3 +63,4 @@ function validateTransferPayload(request) {
 module.exports.TransactionHistory = TransactionHistory;
 module.exports.validateTransfer = validateTransfer;
 module.exports.validateTransferPayload = validateTransferPayload;
+module.exports.validateVechainTransfer = validateVechainTransfer;
