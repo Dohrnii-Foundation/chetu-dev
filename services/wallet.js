@@ -53,7 +53,8 @@ module.exports.createWalletByBSC = async (req) => {
     coinShortName: "ETH",
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/ether.PNG",
     seedId: options.seedId,
-    walletAddress: mnemonicWallet.address
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"ERC-20"
   },
   {
     coinName: "VeChain",
@@ -74,7 +75,8 @@ module.exports.createWalletByBSC = async (req) => {
     coinShortName: "DHN",
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
     seedId: options.seedId,
-    walletAddress: mnemonicWallet.address
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"VET"
   }
   ]);
   return {
@@ -215,7 +217,8 @@ module.exports.walletDetail = async (req) => {
         coinName: el.coinName,
         coinShortName: el.coinShortName,
         coinValue: el.coinValue,
-        coinUsdValue: el.coinUsdValue
+        coinUsdValue: el.coinUsdValue,
+        coinStandard: el.coinStandard
     }
   })
   };

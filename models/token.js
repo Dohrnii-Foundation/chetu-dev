@@ -31,6 +31,10 @@ const Token = mongoose.model(
       type: Number,
       default: 0,
     },
+    coinStandard: {
+      type: String,
+      default:""
+    },
     date: {
       type: Date,
       default: Date.now,
