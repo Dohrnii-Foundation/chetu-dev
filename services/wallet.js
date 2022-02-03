@@ -1,6 +1,6 @@
 const message = require("../lang/message");
 const EthereumQRPlugin = require("ethereum-qr-code");
-const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload } = require("../models/walletAddress");
+const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload,validateWalletUpdatePayload } = require("../models/walletAddress");
 const { validateTransferPayload } = require("../models/transactionHistory");
 const { Token } = require("../models/token");
 const debug = require("debug")("app:walletlog");
@@ -329,6 +329,51 @@ module.exports.walletTransactionHistory = async (req) => {
     status: 200,
     message: message.FETCH_SUCCESSFULLY,
     data: mappedValue,
+  };
+};
+/********** Update Wallet ************
+ * @param {Object} options
+ *
+ * @return {Array | mappedWalletDetail} walletdetail
+ *
+ *********** Update Wallet ***********/
+ module.exports.updateWallet = async (req) => {
+  const options = req.body;
+  const error = validateWalletUpdatePayload(options)
+    if (error)
+    return { result: false, status: 202, message: error.details[0].message };
+
+  let walletDetail = await WalletAddress.find({
+    walletAddress: options.walletAddress
+  });
+   if(walletDetail.length == 0)
+   return {
+    result: true,
+    status: 200,
+    message: message.NO_RECORD_FOUND,
+   }
+   const filter = { walletAddress:  options.walletAddress };
+   const update = { walletName:  options.walletName };
+   let updatedValue =  await WalletAddress.findOneAndUpdate(
+          filter,
+          update,
+          {
+            new: true,
+          }
+        );
+        
+  return {
+    result: true,
+    status: 200,
+    message: message.UPDATE_SUCCESSFULLY,
+    data: [
+      {
+        walletAddress: updatedValue.walletAddress,
+        walletName: updatedValue.walletName,
+        qrCode: updatedValue.qrCode,
+        balance: updatedValue.balance
+      }
+    ]
   };
 };
 /********** Generate QrCode ************

@@ -71,7 +71,16 @@ function validateWalletListPayload(request) {
 
   return error;
 }
+function validateWalletUpdatePayload(request) {
+  let { error } = Joi.object({
+    walletAddress: Joi.string().required(),
+    walletName: Joi.string().required(),
+  }).validate(request);
+
+  return error;
+}
 module.exports.WalletAddress = WalletAddress;
 module.exports.validateRequest = validateRequest;
 module.exports.validateWalletDetailPayload = validateWalletDetailPayload;
 module.exports.validateWalletListPayload = validateWalletListPayload;
+module.exports.validateWalletUpdatePayload = validateWalletUpdatePayload;

@@ -14,5 +14,6 @@ module.exports = {
   NO_RECORD_FOUND:"No record found",
   INVALID_SEED:"Invalid Seed",
   INVALID_COIN_SHORT_NAME: "Invalid CoinShortName",
-  INVALID_BLOCK_CHAIN: "Invalid BlockChain"
+  INVALID_BLOCK_CHAIN: "Invalid BlockChain",
+  UPDATE_SUCCESSFULLY: "Update Successfully"
 };
