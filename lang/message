@@ -15,5 +15,7 @@ module.exports = {
   INVALID_SEED:"Invalid Seed",
   INVALID_COIN_SHORT_NAME: "Invalid CoinShortName",
   INVALID_BLOCK_CHAIN: "Invalid BlockChain",
-  UPDATE_SUCCESSFULLY: "Update Successfully"
+  UPDATE_SUCCESSFULLY: "Update Successfully",
+  MAIL_SEND_SUCCESSFULLY: "Mail Send Successfully",
+  MAIL_SEND_FAILED: "Mail Send Failed",
 };
