@@ -33,6 +33,11 @@ module.exports.createWalletByBSC = async (req) => {
       return {result: false, status: 202, message: message.INVALID_SEED }
     }
     let mnemonicWallet = ethers.Wallet.fromMnemonic(seed[0].seedString);
+    let wallet = await WalletAddress.find({
+      walletAddress: mnemonicWallet.address
+    });
+    if (wallet.length > 0)
+    return { result: false, status: 202, message: message.MULTIPLE_WALLET_NOT_SUPPORTED };
  // let encryptedKey = CryptoJS.AES.encrypt(privateKey,config.get('secretKey') ).toString();
   let code = await generateQrCode(mnemonicWallet.address);
   let walletAddress = new WalletAddress({
