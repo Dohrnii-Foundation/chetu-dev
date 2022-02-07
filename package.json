@@ -17,6 +17,7 @@
     "bip32": "^2.0.6",
     "bip39": "^3.0.4",
     "bitcoinjs-lib": "^5.2.0",
+    "coingecko-api": "^1.0.10",
     "config": "^3.3.6",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",

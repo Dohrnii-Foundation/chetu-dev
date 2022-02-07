@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const CoinGecko = require('coingecko-api');
 
 module.exports.validateBlockChain = async(option) => {
     let blockChain
@@ -31,7 +32,7 @@ const transporter = nodemailer.createTransport({
 let mailOptions = {
   from: "chetuanmol0801@gmail.com", 
   to: "saquibm@chetu.com", 
-  subject: "Test Subject", 
+  subject: `Query from ${option.walletAddress} user`, 
   text: option.message // body of email
 };
  return new Promise((resolve,reject)=>{
@@ -44,4 +45,32 @@ let mailOptions = {
       });
  })
 
+}
+module.exports.coinUsdValue = async(coin,coinValue)=>{
+  let coinUsdValue
+  const CoinGeckoClient = new CoinGecko();
+    let price = await CoinGeckoClient.simple.price({
+      ids: ['ethereum', 'vechain', 'vethor-token', 'dai'],
+      vs_currencies: ['usd'],
+  });
+   let obj = {
+     eth: price.data.ethereum.usd,
+     vet: price.data.vechain.usd,
+     vthor: price.data['vethor-token'].usd,
+     dai: price.data.dai.usd
+   }
+   switch (coin) {
+    case 'VET': 
+         coinUsdValue = coinValue * obj.vet
+        break;
+    case 'VTHO': 
+        coinUsdValue = coinValue * obj.vthor
+        break;
+    case 'DHN': 
+        coinUsdValue = coinValue * obj.dai
+        break;
+    default: 
+        coinUsdValue = 'INVALID'
+    }
+    return coinUsdValue
 }
