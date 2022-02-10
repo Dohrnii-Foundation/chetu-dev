@@ -8,19 +8,19 @@ const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test netw
 const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";      
 const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
 const { Framework } = require('@vechain/connex-framework');
-const { TransactionHistory, validateVechainTransfer } = require("../models/transactionHistory");
+const { TransactionHistory, validateBlockChainTransfer } = require("../models/transactionHistory");
 const { WalletAddress } = require("../models/walletAddress");
 const { Token } = require("../models/token");
 const message = require("../lang/message");
-const { coinUsdValue } = require("../helper/helper");
+const { coinUsdValue,validateCoinShortNameVechain} = require("../helper/helper");
 
 module.exports.veChainMethod = async (req) => {
 
     const options = req.body;
-    const error = validateVechainTransfer(options);
+    const error = validateBlockChainTransfer(options);
     if (error)
       return { result: false, status: 202, message: error.details[0].message };
-        let coinShortName = await validateCoinShortName(options.coinShortName);
+        let coinShortName = await validateCoinShortNameVechain(options.coinShortName);
         if(coinShortName == 'INVALID')
         return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
          
@@ -166,21 +166,3 @@ module.exports.veChainMethod = async (req) => {
            }    
     }   
 };
-
-function validateCoinShortName(coin){
-    let coinValue
-            switch (coin) {
-                case 'VET': 
-                    coinValue = 'VET'
-                    break;
-                case 'VTHO': 
-                    coinValue = 'VTHO'
-                    break;
-                case 'DHN': 
-                    coinValue = 'DHN'
-                    break;
-                default: 
-                    coinValue = 'INVALID'
-                }
-                return coinValue
-}

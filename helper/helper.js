@@ -74,3 +74,31 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
     }
     return coinUsdValue
 }
+module.exports.validateCoinShortNameVechain = async(coin)=>{
+  let coinValue
+  switch (coin) {
+      case 'VET': 
+          coinValue = 'VET'
+          break;
+      case 'VTHO': 
+          coinValue = 'VTHO'
+          break;
+      case 'DHN': 
+          coinValue = 'DHN'
+          break;
+      default: 
+          coinValue = 'INVALID'
+      }
+      return coinValue
+}
+module.exports.validateCoinShortNameEthereum = async(coin)=>{
+  let coinValue
+  switch (coin) {
+      case 'ETH': 
+          coinValue = 'ETH'
+          break;
+      default: 
+          coinValue = 'INVALID'
+      }
+      return coinValue
+}

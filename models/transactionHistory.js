@@ -41,7 +41,7 @@ function validateTransfer(request) {
 
   return error;
 }
-function validateVechainTransfer(request) {
+function validateBlockChainTransfer(request) {
   let { error } = Joi.object({
     walletAddressTo: Joi.string().required(),
     walletAddressFrom: Joi.string().required(),
@@ -63,4 +63,4 @@ function validateTransferPayload(request) {
 module.exports.TransactionHistory = TransactionHistory;
 module.exports.validateTransfer = validateTransfer;
 module.exports.validateTransferPayload = validateTransferPayload;
-module.exports.validateVechainTransfer = validateVechainTransfer;
+module.exports.validateBlockChainTransfer = validateBlockChainTransfer;
