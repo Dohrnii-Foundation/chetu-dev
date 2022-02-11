@@ -1,55 +1,97 @@
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider('https://kovan.infura.io/v3/1e08f56f5e8f46c9be366f614b88f2ef')); // kovan test network
-const fs = require('fs');
-const contractabiDHN = JSON.parse(fs.readFileSync("IERC20.json",'utf8'));
-const contractAddressDHN = "0xB63E3f2Fbe7A6529641A9792fA402af57F4910eA";
-         
-  const walletAddress = "0x8EFef04B92271d94a04d8aaeFe5C6A6597e68b68"; 
-const contractDHN = new web3.eth.Contract(contractabiDHN,contractAddressDHN, { from: walletAddress });
+const { TransactionHistory, validateBlockChainTransfer } = require("../models/transactionHistory");
+const { WalletAddress } = require("../models/walletAddress");
+const { Token } = require("../models/token");
+const message = require("../lang/message");
+const { coinUsdValue,validateCoinShortNameEthereum } = require("../helper/helper"); 
 
-module.exports.web3Method = async (req) => {
-  
-    //let connect = await web3.eth.net.isListening()
+module.exports.ethereumMethod = async (req) => {
 
-   // web3.personal.unlockAccount("0x8EFef04B92271d94a04d8aaeFe5C6A6597e68b68", "ebb0d66ec1f4de8df9870b6284cf2c3d8c7eb0cd4223a9c3e3ceed7b4c988983", 1000);
-    // const options = {
-    //     to: "0xFdab82913EE8b1ac6a7c52736dC598475Db29cc1", // address where you want to transfer tokens
-    //     value: 100000000000000, // amount you want to transfer (1matic= 100000000000000000)
-    //     gas: "21000", // gas value for this transaction to succed
+    const options = req.body;
+    const error = validateBlockChainTransfer(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
+        let coinShortName = await validateCoinShortNameEthereum(options.coinShortName);
+        if(coinShortName == 'INVALID')
+        return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
 
-    // };
-
-    try{
-        const count = await web3.eth.getTransactionCount(walletAddress)
-        const gasPrice = await web3.eth.getGasPrice()
-         const gasLimit = await contractDHN.methods.transfer('0xFdab82913EE8b1ac6a7c52736dC598475Db29cc1', 10).estimateGas({
-            from: walletAddress,
-            to: contractAddressDHN,
-        });
-       let data = contractDHN.methods.transfer("0xFdab82913EE8b1ac6a7c52736dC598475Db29cc1", 10).encodeABI()
-       let options = {
-          "from": walletAddress,     // account of user
-          "nonce": web3.utils.toHex(count),
-          "gasPrice": web3.utils.toHex(gasPrice),
-          "gasLimit": web3.utils.toHex(gasLimit),
-          "to": contractAddressDHN,   // contract address
-          "data": data,
-        };
-        const signed = await web3.eth.accounts.signTransaction(options, '0xebb0d66ec1f4de8df9870b6284cf2c3d8c7eb0cd4223a9c3e3ceed7b4c988983');
+        const addressFrom = await WalletAddress.find({
+            walletAddress: options.walletAddressFrom
+          });
+          if (addressFrom.length === 0)
+          return {
+            result: false,
+            status: 202,
+            message: message.INVALID_WALLET_ADDRESS,
+          };
+          const addressTo = await WalletAddress.find({
+            walletAddress: options.walletAddressTo
+          });
+          let privateKey = addressFrom[0].privateKey;
+          let walletAddress = addressFrom[0].walletAddress;
+          if(coinShortName == 'ETH') {
+            let senderAccountInWei = await web3.eth.getBalance(walletAddress)
+            let receiverAccountInWei = await web3.eth.getBalance(options.walletAddressTo)
+            let amount = (options.amount * 10 **18).toString()
+                if(senderAccountInWei < amount)
+             return{
+                result: false, status: 202, message: message.INSUFFICIENT_BALANCE   
+             }
+             try{
+              let payload = {
+               to: options.walletAddressTo, 
+               value: amount, 
+               gas: "21000", 
+                   }; 
+         let signed = await web3.eth.accounts.signTransaction(payload, privateKey);
         //submitting transaction to blockchain
-        const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
-        console.log(receipt);
-        
-        console.log('value of account balance of  sender:::', await contractDHN.methods.balanceOf(walletAddress).call());
-    
-        console.log('value of account balance of receiver:::', await contractDHN.methods.balanceOf("0xFdab82913EE8b1ac6a7c52736dC598475Db29cc1").call());
-
-        return true;
+        let receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
+           if(receipt){
+            let senderAccountInEth = await web3.utils.fromWei(web3.utils.toBN(senderAccountInWei).toString(), 'ether')
+            let gasInEth = await web3.utils.fromWei(web3.utils.toBN(21000).toString(),'ether')
+            let coinUpdatedValue = Number(senderAccountInEth) - (options.amount + Number(gasInEth));
+        let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)                 
+       let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'ETH'  }; 
+       let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
+            //Update database
+         await Token.findOneAndUpdate(
+         filter_from,
+         update_from,
+         {
+           new: true,
+         }
+       );
+       if(addressTo.length > 0){
+        let receiverAccountInEth = await web3.utils.fromWei(web3.utils.toBN(receiverAccountInWei).toString(), 'ether')
+        let coinUpdatedValue = Number(receiverAccountInEth) + options.amount
+         let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
+           let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'ETH' }; 
+           let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
+           await Token.findOneAndUpdate(
+               filter_to,
+               update_to,
+               {
+                 new: true,
+               }
+             );
+       }
+  
+       let transactionHistory = new TransactionHistory({
+         walletAddressTo: options.walletAddressTo,
+         walletAddressFrom: options.walletAddressFrom,
+         amount: options.amount,
+         coinName: "Ethereum",
+       });
+       await transactionHistory.save();
+       return {
+         result: true,
+         status: 200,
+         message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+         }; 
+       } 
+             } catch(err){
+              return { result: false, status: 202, message:err.message }
+             }
     }
-
-    catch(error){
-        console.log("value of error :::",error);
-        return false;
-    }
-
-};
+  }

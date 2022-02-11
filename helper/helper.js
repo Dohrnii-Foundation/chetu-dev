@@ -59,6 +59,7 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
      vthor: price.data['vethor-token'].usd,
      dai: price.data.dai.usd
    }
+   console.log('obj;;;',obj)
    switch (coin) {
     case 'VET': 
          coinUsdValue = coinValue * obj.vet
@@ -69,6 +70,9 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
     case 'DHN': 
         coinUsdValue = coinValue * obj.dai
         break;
+    case 'ETH': 
+        coinUsdValue = coinValue * obj.eth
+       break;    
     default: 
         coinUsdValue = 'INVALID'
     }
