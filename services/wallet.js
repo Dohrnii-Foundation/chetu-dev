@@ -13,6 +13,8 @@ const CryptoJS = require("crypto-js");
 const config = require("config");
 const ethers = require('ethers');
 const bip39 = require("bip39");
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -204,6 +206,24 @@ module.exports.walletDetail = async (req) => {
          }
         },
       ])
+      let walletBalance = await WalletAddress.aggregate([
+        {
+          $match:
+          {'walletAddress': options.walletAddress, }
+        },
+        {
+          $lookup:
+           {
+          from: 'tokens',
+          localField: 'walletAddress',
+          foreignField:'walletAddress',
+          as: 'tokenDataForSum'
+           }
+          },
+          { "$project": {
+            "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
+          }} 
+      ])
    if(walletDetail.length == 0)
    return {
     result: true,
@@ -217,7 +237,7 @@ module.exports.walletDetail = async (req) => {
     walletAddress: walletDetail[0].walletAddress,
     walletName: walletDetail[0].walletName,
     qrCode: walletDetail[0].qrCode,
-    balance: walletDetail[0].balance,
+    balance: walletBalance[0].total,
    data: walletDetail[0].tokenData.map((el) => {
     return {
         coinIcon: el.coinIcon,
@@ -254,6 +274,24 @@ module.exports.walletList = async (req) => {
   let walletDetail = await WalletAddress.find({
     seedId: options.seedId
   });
+  let walletBalance = await WalletAddress.aggregate([
+    {
+      $match:
+      {'seedId': ObjectId(options.seedId), }
+    },
+    {
+      $lookup:
+       {
+      from: 'tokens',
+      localField: 'seedId',
+      foreignField:'seedId',
+      as: 'tokenDataForSum'
+       }
+      },
+      { "$project": {
+        "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
+      }} 
+  ])
    if(walletDetail.length == 0)
    return {
     result: true,
@@ -265,7 +303,7 @@ module.exports.walletList = async (req) => {
       walletAddress: el.walletAddress,
       walletName: el.walletName,
       qrCode: el.qrCode,
-      balance: el.balance
+      balance: walletBalance[0].total
     }
   })
   return {
@@ -368,7 +406,24 @@ module.exports.walletTransactionHistory = async (req) => {
             new: true,
           }
         );
-        
+        let walletBalance = await WalletAddress.aggregate([
+          {
+            $match:
+            {'walletAddress': options.walletAddress, }
+          },
+          {
+            $lookup:
+             {
+            from: 'tokens',
+            localField: 'walletAddress',
+            foreignField:'walletAddress',
+            as: 'tokenDataForSum'
+             }
+            },
+            { "$project": {
+              "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
+            }} 
+        ])
   return {
     result: true,
     status: 200,
@@ -378,7 +433,7 @@ module.exports.walletTransactionHistory = async (req) => {
         walletAddress: updatedValue.walletAddress,
         walletName: updatedValue.walletName,
         qrCode: updatedValue.qrCode,
-        balance: updatedValue.balance
+        balance: walletBalance[0].total
       }
     ]
   };
