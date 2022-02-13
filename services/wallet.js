@@ -1,6 +1,6 @@
 const message = require("../lang/message");
 const EthereumQRPlugin = require("ethereum-qr-code");
-const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload,validateWalletUpdatePayload } = require("../models/walletAddress");
+const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload,validateWalletUpdatePayload,validateRestoreWalletPayload } = require("../models/walletAddress");
 const { validateTransferPayload } = require("../models/transactionHistory");
 const { Token } = require("../models/token");
 const debug = require("debug")("app:walletlog");
@@ -15,6 +15,8 @@ const ethers = require('ethers');
 const bip39 = require("bip39");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const { privateToAddress } = require('ethereumjs-util');
+const { validateWalletRestoreType } = require('../helper/helper');
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -437,6 +439,59 @@ module.exports.walletTransactionHistory = async (req) => {
       }
     ]
   };
+};
+/**********Restore Wallet ************
+ * @param {Object} options
+ *
+ * @return {Object} seedId, walletAddress
+ *
+ *********** Restore Wallet ***********/
+ module.exports.restoreWallet = async (req) => {
+  const options = req.body;
+  const error = validateRestoreWalletPayload(options)
+    if (error)
+    return { result: false, status: 202, message: error.details[0].message };
+    let type = await validateWalletRestoreType(options.restoreType);
+    if(type == 'INVALID')
+    return{ result: false, status: 202, message: message.INVALID_RESTORE_TYPE }
+
+    if(type == 'SEED_PHRASE'){
+      if(bip39.validateMnemonic(options.restorePayload)==false){
+        return {result: false, status: 202, message: message.INVALID_SEED }
+      }
+      let mnemonicWallet = ethers.Wallet.fromMnemonic(options.restorePayload);
+      let wallet = await WalletAddress.find({
+        walletAddress: mnemonicWallet.address
+      });
+      if (wallet.length == 0)
+      return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+      return {
+        result: true,
+        status: 200,
+        message: message.FETCH_SUCCESSFULLY,
+        seedId:wallet[0].seedId,
+        walletAddress: wallet[0].walletAddress
+      }
+    } else {
+     try{
+      let privateKey = options.restorePayload
+      let derivedWallet =  new ethers.Wallet(privateKey)
+      let wallet = await WalletAddress.find({
+        walletAddress: derivedWallet.address
+      });
+      if (wallet.length == 0)
+      return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+      return {
+        result: true,
+        status: 200,
+        message: message.FETCH_SUCCESSFULLY,
+        seedId:wallet[0].seedId,
+        walletAddress: wallet[0].walletAddress
+      }
+    } catch(err){
+      return { result: false, status: 202, message: err.message };
+    }
+  }
 };
 /********** Generate QrCode ************
  * @param {Object} address

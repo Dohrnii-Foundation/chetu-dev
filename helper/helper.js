@@ -106,3 +106,17 @@ module.exports.validateCoinShortNameEthereum = async(coin)=>{
       }
       return coinValue
 }
+module.exports.validateWalletRestoreType = async(type)=>{
+  let restoreType
+  switch (type) {
+      case 'PRIVATE_KEY': 
+      restoreType = 'PRIVATE_KEY'
+          break;
+      case 'SEED_PHRASE': 
+      restoreType = 'SEED_PHRASE'
+          break;
+      default: 
+      restoreType = 'INVALID'
+      }
+      return restoreType
+}
