@@ -81,7 +81,7 @@ module.exports.ethereumMethod = async (req) => {
          walletAddressTo: options.walletAddressTo,
          walletAddressFrom: options.walletAddressFrom,
          amount: options.amount,
-         coinName: "Ethereum",
+         coinName: "Ether",
        });
        await transactionHistory.save();
        return {
