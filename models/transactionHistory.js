@@ -26,6 +26,10 @@ const TransactionHistory = mongoose.model(
       type: String,
       required: true,
     },
+    blockChain: {
+      type: String,
+      required: true
+    },
     date: {
       type: Date,
       default: Date.now,

@@ -35,6 +35,11 @@ const Token = mongoose.model(
       type: String,
       default:""
     },
+    blockChain: {
+      type: String,
+      enum : ['ETHEREUM','VECHAIN','BSC','POLYGON'],
+      required: true,
+    },
     date: {
       type: Date,
       default: Date.now,
