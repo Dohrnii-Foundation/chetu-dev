@@ -2,6 +2,8 @@ const express = require("express");
 const wallet = require("../services/wallet");
 const veChain= require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
+const bsc = require('../methods/bscMethods');
+const polygon = require('../methods/polygonMethods');
 const message = require('../lang/message');
 const {validateBlockChain} = require('../helper/helper');
 const router = express.Router();
@@ -35,6 +37,12 @@ router.post("/transfertoken", async (req, res, next) => {
         res.status(result.status || 200).send(result);
        }else if(blockChain == 'VECHAIN'){
         const result = await veChain.veChainMethod(req)
+        res.status(result.status || 200).send(result);     
+       }else if(blockChain == 'BSC'){
+        const result = await bsc.bscMethod(req)
+        res.status(result.status || 200).send(result);     
+       }else if(blockChain == 'POLYGON'){
+        const result = await polygon.polygonMethod(req)
         res.status(result.status || 200).send(result);     
        }
     

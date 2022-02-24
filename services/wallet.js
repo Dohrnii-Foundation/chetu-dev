@@ -58,12 +58,22 @@ module.exports.createWalletByBSC = async (req) => {
      // create default Tokens
        await Token.insertMany([
      {
-    coinName: "Ether",
+    coinName: "Ethereum",
     coinShortName: "ETH",
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/ether.PNG",
     seedId: options.seedId,
     walletAddress: mnemonicWallet.address,
-    coinStandard:"ERC-20"
+    coinStandard:"",
+    blockChain: "ETHEREUM"
+  },
+  {
+    coinName: "Dohrnii",
+    coinShortName: "DHN",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"ERC-20",
+    blockChain: "ETHEREUM"
   },
   {
     coinName: "VeChain",
@@ -71,7 +81,8 @@ module.exports.createWalletByBSC = async (req) => {
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/veChain.png",
     seedId: options.seedId,
     walletAddress: mnemonicWallet.address,
-    coinStandard:""
+    coinStandard:"",
+    blockChain: "VECHAIN"
   },
   {
     coinName: "VeThor Token",
@@ -79,15 +90,53 @@ module.exports.createWalletByBSC = async (req) => {
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/veThor.png",
     seedId: options.seedId,
     walletAddress: mnemonicWallet.address,
-    coinStandard:""
+    coinStandard:"",
+    blockChain: "VECHAIN"
   },
   {
-    coinName: "Dohrnii Coin",
+    coinName: "Dohrnii",
     coinShortName: "DHN",
     coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
     seedId: options.seedId,
     walletAddress: mnemonicWallet.address,
     coinStandard:"VET",
+    blockChain: "VECHAIN"
+  },
+  {
+    coinName: "BNB",
+    coinShortName: "BNB",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/bnb.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"",
+    blockChain: "BSC"
+  },
+  {
+    coinName: "Dohrnii",
+    coinShortName: "DHN",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"",
+    blockChain: "BSC"
+  },
+  {
+    coinName: "Polygon",
+    coinShortName: "MATIC",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/matic.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"",
+    blockChain: "POLYGON"
+  },
+  {
+    coinName: "Dohrnii",
+    coinShortName: "DHN",
+    coinIcon: "https://dohrniifoundationi2-qa.chetu.com/dai.png",
+    seedId: options.seedId,
+    walletAddress: mnemonicWallet.address,
+    coinStandard:"",
+    blockChain: "POLYGON"
   }
   ]);
   return {
@@ -247,7 +296,8 @@ module.exports.walletDetail = async (req) => {
         coinShortName: el.coinShortName,
         coinValue: el.coinValue,
         coinUsdValue: el.coinUsdValue,
-        coinStandard: el.coinStandard
+        coinStandard: el.coinStandard,
+        blockChain: el.blockChain
     }
   })
   };
@@ -362,13 +412,14 @@ module.exports.walletTransactionHistory = async (req) => {
   }).select("-__v");
             let mappedValue = transactionDetail.map(el => {
               return {
-                "_id": el._id,
-            "walletAddressTo": el.walletAddressTo,
-            "walletAddressFrom": el.walletAddressFrom,
-            "amount": el.amount,
-            "transactionType": el.walletAddressFrom == options.walletAddress ? 'Send' : 'Receive',
-            "coinName": el.coinName,
-            "date": el.date
+                _id: el._id,
+                walletAddressTo: el.walletAddressTo,
+                walletAddressFrom: el.walletAddressFrom,
+                amount: el.amount,
+                transactionType: el.walletAddressFrom == options.walletAddress ? 'Send' : 'Receive',
+                coinName: el.coinName,
+                blockChain: el.blockChain,
+                date: el.date
               };
             });
   return {
