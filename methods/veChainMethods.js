@@ -36,14 +36,13 @@ module.exports.veChainMethod = async (req) => {
       const addressTo = await WalletAddress.find({
         walletAddress: options.walletAddressTo
       });
-      let privateKey = addressFrom[0].privateKey;
+     let privateKey = addressFrom[0].privateKey;
       let walletAddress = addressFrom[0].walletAddress;
       const wallet = new SimpleWallet();
       wallet.import(privateKey);
       const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
       const connex = new Framework(Framework.guardDriver(driver))
       if(coinShortName == 'DHN'){
-      
         const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
         const transferABI = { "constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}
         const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
@@ -60,7 +59,7 @@ module.exports.veChainMethod = async (req) => {
         if(response){
         let coinUpdatedValue = Number(senderBalance.decoded.balance) - options.amount 
         let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)                 
-       let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'DHN' }; 
+       let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'DHN',blockChain: 'VECHAIN' }; 
        let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
                //Update database
           await Token.findOneAndUpdate(
@@ -73,7 +72,7 @@ module.exports.veChainMethod = async (req) => {
         if(addressTo.length > 0){ 
             let coinUpdatedValue = Number(receiverBalance.decoded.balance) + options.amount
             let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'DHN' };
+            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'DHN',blockChain: 'VECHAIN' };
             let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
             await Token.findOneAndUpdate(
                 filter_to,
@@ -88,7 +87,8 @@ module.exports.veChainMethod = async (req) => {
           walletAddressTo: options.walletAddressTo,
           walletAddressFrom: options.walletAddressFrom,
           amount: options.amount,
-          coinName: "Dohrnii Coin",
+          coinName: "Dohrnii",
+          blockChain: 'VECHAIN'
         });
         await transactionHistory.save();
         return {
@@ -109,7 +109,7 @@ module.exports.veChainMethod = async (req) => {
             let receiverBalance = web3.utils.toBN(receiverDetail.balance).toString()
              let amountInHex ="0x" + (options.amount * 10 **18).toString(16);
              let amount = web3.utils.toBN(amountInHex).toString()
-             if(senderBalance < amount)
+             if(parseInt(senderBalance) < parseInt(amount))
              return{
                 result: false, status: 202, message: message.INSUFFICIENT_BALANCE   
              }
@@ -124,7 +124,7 @@ module.exports.veChainMethod = async (req) => {
         if(response){
         let coinUpdatedValue = Number(web3.utils.fromWei(senderBalance, 'ether')) - options.amount;
          let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)                   
-        let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VET'  }; 
+        let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VET',blockChain: 'VECHAIN' }; 
         let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
              //Update database
           await Token.findOneAndUpdate(
@@ -137,7 +137,7 @@ module.exports.veChainMethod = async (req) => {
         if(addressTo.length > 0){
           let coinUpdatedValue = Number(web3.utils.fromWei(receiverBalance, 'ether')) + options.amount
           let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VET' }; 
+            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VET',blockChain: 'VECHAIN' }; 
             let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
             await Token.findOneAndUpdate(
                 filter_to,
@@ -153,6 +153,7 @@ module.exports.veChainMethod = async (req) => {
           walletAddressFrom: options.walletAddressFrom,
           amount: options.amount,
           coinName: "VeChain",
+          blockChain: 'VECHAIN'
         });
         await transactionHistory.save();
         return {
@@ -187,7 +188,7 @@ module.exports.veChainMethod = async (req) => {
   if(response){
     let coinUpdatedValue = Number(web3.utils.fromWei(senderEnergy, 'ether')) - options.amount
     let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)               
-    let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VTHO'  }; 
+    let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VTHO',blockChain: 'VECHAIN'  }; 
     let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
        //Update database
     await Token.findOneAndUpdate(
@@ -200,7 +201,7 @@ module.exports.veChainMethod = async (req) => {
   if(addressTo.length > 0){
     let coinUpdatedValue = Number(web3.utils.fromWei(receiverEnergy, 'ether')) + options.amount
     let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-    let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VTHO' }; 
+    let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VTHO',blockChain: 'VECHAIN' }; 
     let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
       await Token.findOneAndUpdate(
           filter_to,
@@ -216,13 +217,14 @@ module.exports.veChainMethod = async (req) => {
     walletAddressFrom: options.walletAddressFrom,
     amount: options.amount,
     coinName: "VeThor Token",
+    blockChain: 'VECHAIN'
   });
   await transactionHistory.save();
   return {
     result: true,
     status: 200,
     message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
-  }; 
+    }; 
   }      
      } catch(err){
       return { result: false, status: 202, message:err.message }
