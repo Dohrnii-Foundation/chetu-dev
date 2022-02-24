@@ -10,6 +10,12 @@ module.exports.validateBlockChain = async(option) => {
         case 'VECHAIN': 
         blockChain = 'VECHAIN'
             break;
+        case 'BSC': 
+        blockChain = 'BSC'
+            break;
+        case 'POLYGON': 
+        blockChain = 'POLYGON'
+            break;    
         default: 
         blockChain = 'INVALID'
         }
@@ -50,14 +56,16 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
   let coinUsdValue
   const CoinGeckoClient = new CoinGecko();
     let price = await CoinGeckoClient.simple.price({
-      ids: ['ethereum', 'vechain', 'vethor-token', 'dai'],
+      ids: ['ethereum', 'vechain', 'vethor-token', 'dai', 'binancecoin', 'matic-network'],
       vs_currencies: ['usd'],
   });
    let obj = {
      eth: price.data.ethereum.usd,
      vet: price.data.vechain.usd,
      vthor: price.data['vethor-token'].usd,
-     dai: price.data.dai.usd
+     dai: price.data.dai.usd,
+     matic: price.data['matic-network'].usd,
+     binancecoin: price.data.binancecoin.usd,
    }
    switch (coin) {
     case 'VET': 
@@ -71,7 +79,13 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
         break;
     case 'ETH': 
         coinUsdValue = coinValue * obj.eth
-       break;    
+       break;
+    case 'BNB': 
+       coinUsdValue = coinValue * obj.binancecoin
+       break;
+    case 'MATIC': 
+       coinUsdValue = coinValue * obj.matic
+       break;
     default: 
         coinUsdValue = 'INVALID'
     }
@@ -100,11 +114,42 @@ module.exports.validateCoinShortNameEthereum = async(coin)=>{
       case 'ETH': 
           coinValue = 'ETH'
           break;
+      case 'DHN': 
+          coinValue = 'DHN'
+          break;    
       default: 
           coinValue = 'INVALID'
       }
       return coinValue
 }
+module.exports.validateCoinShortNameBsc = async(coin)=>{
+  let coinValue
+  switch (coin) {
+      case 'BNB': 
+          coinValue = 'BNB'
+          break;
+      case 'DHN': 
+          coinValue = 'DHN'
+          break;    
+      default: 
+          coinValue = 'INVALID'
+      }
+      return coinValue
+}
+module.exports.validateCoinShortNamePolygon = async(coin)=>{
+    let coinValue
+    switch (coin) {
+        case 'MATIC': 
+            coinValue = 'MATIC'
+            break;
+        case 'DHN': 
+            coinValue = 'DHN'
+            break;    
+        default: 
+            coinValue = 'INVALID'
+        }
+        return coinValue
+  }
 module.exports.validateWalletRestoreType = async(type)=>{
   let restoreType
   switch (type) {
