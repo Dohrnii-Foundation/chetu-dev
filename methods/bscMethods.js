@@ -50,9 +50,12 @@ module.exports.bscMethod = async (req) => {
         //submitting transaction to blockchain
         let receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
            if(receipt){
+            let gasPrice = await web3.eth.getGasPrice()
+            const gasLimit = 21000
+            let gasConsumed = gasLimit * parseInt(gasPrice)
             let senderAccountInBnb = await web3.utils.fromWei(web3.utils.toBN(senderAccountInWei).toString(), 'ether')
-            let gasInEth = await web3.utils.fromWei(web3.utils.toBN(21000).toString(),'ether')
-            let coinUpdatedValue = Number(senderAccountInBnb) - (options.amount + Number(gasInEth));
+            let gasInBnb = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether')
+            let coinUpdatedValue = Number(senderAccountInBnb) - (options.amount + Number(gasInBnb));
         let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)             
        let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'BNB', blockChain: 'BSC' }; 
        let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
@@ -104,7 +107,6 @@ module.exports.bscMethod = async (req) => {
       let amountInWei = await web3.utils.toWei((options.amount).toString(), 'ether');
       if(parseInt(senderBalance) < parseInt(amountInWei))
       return { result: false, status: 202, message: message.INSUFFICIENT_BALANCE }
-      let senderBalanceInBnb = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
     try{
       let count = await web3.eth.getTransactionCount(walletAddress)
       let gasPrice = await web3.eth.getGasPrice()
@@ -126,7 +128,6 @@ module.exports.bscMethod = async (req) => {
       const signed = await web3.eth.accounts.signTransaction(payload, privateKey);
       const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
       if(receipt){
-        let gasInBnb = await web3.utils.fromWei(web3.utils.toBN(gasLimit).toString(),'ether')
         let senderBalanceInBnb = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
         let coinUpdatedValue = parseInt(senderBalanceInBnb) - (options.amount );
       let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)              
@@ -174,3 +175,51 @@ module.exports.bscMethod = async (req) => {
      } 
     }
   }
+
+  module.exports.bscGas = async (req) => {
+    const options = req.body;
+    let coinShortName = await validateCoinShortNameBsc(options.coinShortName);
+    if(coinShortName == 'INVALID')
+    return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
+  
+    const addressFrom = await WalletAddress.find({
+        walletAddress: options.walletAddressFrom
+      });
+      if (addressFrom.length === 0)
+      return {
+        result: false,
+        status: 202,
+        message: message.INVALID_WALLET_ADDRESS,
+      };
+      let walletAddress = addressFrom[0].walletAddress;
+      if(coinShortName == 'BNB'){
+        let gasPrice = await web3.eth.getGasPrice()
+        const gasLimit = 21000
+        let gasConsumed = gasLimit * parseInt(gasPrice)
+        let gasInBnb = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
+        return {
+          result: true,
+          status: 200,
+          message: message.FETCH_SUCCESSFULLY,
+          gasConsumed: gasInBnb,
+          gasUnit:'BNB'
+         }
+      } else if(coinShortName == 'DHN'){
+        const contractDHN = new web3.eth.Contract(contractabiDHN,contractAddressDHN, { from: walletAddress });
+        let amountInWei = await web3.utils.toWei((options.amount).toString(), 'ether');
+        let gasPrice = await web3.eth.getGasPrice()
+        let gasLimit = await contractDHN.methods.transfer(options.walletAddressTo, amountInWei).estimateGas({
+            from: walletAddress,
+            to: contractAddressDHN,
+        });
+        let gasConsumed = gasLimit * parseInt(gasPrice)
+        let gasInBnb = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
+       return {
+        result: true,
+        status: 200,
+        message: message.FETCH_SUCCESSFULLY,
+        gasConsumed: gasInBnb,
+        gasUnit:'BNB'
+       }
+      }
+   } 
