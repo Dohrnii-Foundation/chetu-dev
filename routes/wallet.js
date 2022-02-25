@@ -105,5 +105,16 @@ router.post("/transactionhistory", async (req, res, next) => {
     next(err);
   }
 });
+/**
+ * Estimate Gas.
+ */
+ router.post("/gas/estimate", async (req, res, next) => {
+  try {
+    const result = await wallet.estimateGas(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

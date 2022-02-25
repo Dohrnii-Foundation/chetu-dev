@@ -1,13 +1,12 @@
 const message = require("../lang/message");
 const EthereumQRPlugin = require("ethereum-qr-code");
 const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalletListPayload,validateWalletUpdatePayload,validateRestoreWalletPayload } = require("../models/walletAddress");
-const { validateTransferPayload } = require("../models/transactionHistory");
-const { Token } = require("../models/token");
-const debug = require("debug")("app:walletlog");
-const {
+const { validateTransferPayload,
   TransactionHistory,
   validateTransfer,
-} = require("../models/transactionHistory");
+  validateBlockChainTransfer  } = require("../models/transactionHistory");
+const { Token } = require("../models/token");
+const debug = require("debug")("app:walletlog");
 const { Seed } = require("../models/seed");
 const CryptoJS = require("crypto-js");
 const config = require("config");
@@ -15,8 +14,11 @@ const ethers = require('ethers');
 const bip39 = require("bip39");
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
-const { privateToAddress } = require('ethereumjs-util');
-const { validateWalletRestoreType } = require('../helper/helper');
+const { validateWalletRestoreType,validateBlockChain } = require('../helper/helper');
+const veChain = require('../methods/veChainMethods');
+const ethereum = require('../methods/ethereumMethods');
+const bsc = require('../methods/bscMethods');
+const polygon = require('../methods/polygonMethods');
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -543,6 +545,35 @@ module.exports.walletTransactionHistory = async (req) => {
       return { result: false, status: 202, message: err.message };
     }
   }
+};
+/**********Estimate Gas ************
+ * @param {Object} options
+ *
+ * @return {Object} Gas Price
+ *
+ *********** Estimate Gas ***********/
+ module.exports.estimateGas = async (req) => {
+  const options = req.body;
+    const error = validateBlockChainTransfer(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
+      let blockChain  = await validateBlockChain(options)
+      if(blockChain == 'INVALID'){
+        return { result: false, status: 202, message: message.INVALID_BLOCK_CHAIN };
+       }
+       if(blockChain == 'ETHEREUM'){
+        const result = await ethereum.ethereumGas(req);
+        return result
+       }else if(blockChain == 'VECHAIN'){
+        const result = await veChain.veChainGas(req)
+        return result   
+       }else if(blockChain == 'BSC'){
+        const result = await bsc.bscGas(req)
+       return result   
+       }else if(blockChain == 'POLYGON'){
+        const result = await polygon.polygonGas(req)
+        return result   
+       }  
 };
 /********** Generate QrCode ************
  * @param {Object} address
