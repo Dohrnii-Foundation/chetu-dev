@@ -3,7 +3,7 @@ const wallet = require("../services/wallet");
 const veChain= require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
-const polygon = require('../methods/polygonMethods');
+//const polygon = require('../methods/polygonMethods');
 const message = require('../lang/message');
 const {validateBlockChain} = require('../helper/helper');
 const router = express.Router();
@@ -111,6 +111,17 @@ router.post("/transactionhistory", async (req, res, next) => {
  router.post("/gas/estimate", async (req, res, next) => {
   try {
     const result = await wallet.estimateGas(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+/**
+ * Implement Staking.
+ */
+ router.post("/staking", async (req, res, next) => {
+  try {
+    const result = await wallet.Staking(req);
     res.status(result.status || 200).send(result);
   } catch (err) {
     next(err);
