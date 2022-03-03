@@ -3,7 +3,7 @@ const wallet = require("../services/wallet");
 const veChain= require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
-//const polygon = require('../methods/polygonMethods');
+// const polygon = require('../methods/polygonMethods');
 const message = require('../lang/message');
 const {validateBlockChain} = require('../helper/helper');
 const router = express.Router();
@@ -41,10 +41,11 @@ router.post("/transfertoken", async (req, res, next) => {
        }else if(blockChain == 'BSC'){
         const result = await bsc.bscMethod(req)
         res.status(result.status || 200).send(result);     
-       }else if(blockChain == 'POLYGON'){
-        const result = await polygon.polygonMethod(req)
-        res.status(result.status || 200).send(result);     
        }
+      //  else if(blockChain == 'POLYGON'){
+      //   const result = await polygon.polygonMethod(req)
+      //   res.status(result.status || 200).send(result);     
+      //  }
     
   } catch (err) {
     next(err);
@@ -116,16 +117,16 @@ router.post("/transactionhistory", async (req, res, next) => {
     next(err);
   }
 });
-/**
- * Implement Staking.
- */
- router.post("/staking", async (req, res, next) => {
-  try {
-    const result = await wallet.Staking(req);
-    res.status(result.status || 200).send(result);
-  } catch (err) {
-    next(err);
-  }
-});
+// /**
+//  * Implement Staking.
+//  */
+//  router.post("/staking", async (req, res, next) => {
+//   try {
+//     const result = await wallet.Staking(req);
+//     res.status(result.status || 200).send(result);
+//   } catch (err) {
+//     next(err);
+//   }
+// });
 
 module.exports = router;
