@@ -23,7 +23,7 @@ app.use("/v1/setting", require('./routes/setting'));
 
 
 
-const port = process.env.port || 3000;
+const port = process.env.port || 8080;
 app.listen(port, () => {
   debug(`Listening on port ${port}...`);
 });
