@@ -19,6 +19,7 @@ const veChain = require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
 const polygon = require('../methods/polygonMethods');
+const veChainStak = require('../methods/veChainStaking');
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -566,6 +567,36 @@ module.exports.walletTransactionHistory = async (req) => {
         return result
        }else if(blockChain == 'VECHAIN'){
         const result = await veChain.veChainGas(req)
+        return result   
+       }else if(blockChain == 'BSC'){
+        const result = await bsc.bscGas(req)
+       return result   
+       }else if(blockChain == 'POLYGON'){
+        const result = await polygon.polygonGas(req)
+        return result   
+       }  
+};
+/********** Staking ************
+ * @param {Object} options
+ *
+ * @return {Object} Gas Price
+ *
+ *********** Staking ***********/
+ module.exports.Staking = async (req) => {
+  const options = req.body;
+    // const error = validateBlockChainTransfer(options);
+    // if (error)
+    //   return { result: false, status: 202, message: error.details[0].message };
+    console.log('options;;;',options)
+      let blockChain  = await validateBlockChain(options)
+      if(blockChain == 'INVALID'){
+        return { result: false, status: 202, message: message.INVALID_BLOCK_CHAIN };
+       }
+       if(blockChain == 'ETHEREUM'){
+        const result = await ethereum.ethereumGas(req);
+        return result
+       }else if(blockChain == 'VECHAIN'){
+        const result = await veChainStak.veChainStaking(req)
         return result   
        }else if(blockChain == 'BSC'){
         const result = await bsc.bscGas(req)
