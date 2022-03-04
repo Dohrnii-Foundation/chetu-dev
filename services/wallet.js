@@ -18,8 +18,8 @@ const { validateWalletRestoreType,validateBlockChain } = require('../helper/help
 const veChain = require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
-const polygon = require('../methods/polygonMethods');
-const veChainStak = require('../methods/veChainStaking');
+//const polygon = require('../methods/polygonMethods');
+//const veChainStak = require('../methods/veChainStaking');
 /********** Create Wallet ************
  * @param {Object} options
  *
