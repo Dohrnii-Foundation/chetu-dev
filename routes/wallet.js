@@ -117,9 +117,21 @@ router.post("/transactionhistory", async (req, res, next) => {
     next(err);
   }
 });
-// /**
-//  * Implement Staking.
-//  */
+/**
+ * Implement Test route.
+ * 
+ */
+ router.get("/test", async (req, res, next) => {
+  try {
+    const result = await wallet.test();
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+/**
+ * Implement Staking.
+ */
 //  router.post("/staking", async (req, res, next) => {
 //   try {
 //     const result = await wallet.Staking(req);
