@@ -4,7 +4,7 @@ const { WalletAddress, validateRequest,validateWalletDetailPayload,validateWalle
 const { validateTransferPayload,
   TransactionHistory,
   validateTransfer,
-  validateBlockChainTransfer  } = require("../models/transactionHistory");
+  validateBlockChainTransfer,validateBlockChainFee  } = require("../models/transactionHistory");
 const { Token } = require("../models/token");
 const debug = require("debug")("app:walletlog");
 const { Seed } = require("../models/seed");
@@ -423,7 +423,9 @@ module.exports.walletTransactionHistory = async (req) => {
                 transactionType: el.walletAddressFrom == options.walletAddress ? 'Send' : 'Receive',
                 coinName: el.coinName,
                 blockChain: el.blockChain,
-                date: el.date
+                date: el.date,
+                fee: el.fee,
+                feeCoinShortName: el.feeCoinShortName
               };
             });
   return {
@@ -556,7 +558,7 @@ module.exports.walletTransactionHistory = async (req) => {
  *********** Estimate Gas ***********/
  module.exports.estimateGas = async (req) => {
   const options = req.body;
-    const error = validateBlockChainTransfer(options);
+    const error = validateBlockChainFee(options);
     if (error)
       return { result: false, status: 202, message: error.details[0].message };
       let blockChain  = await validateBlockChain(options)

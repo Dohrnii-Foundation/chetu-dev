@@ -87,7 +87,9 @@ module.exports.bscMethod = async (req) => {
          walletAddressFrom: options.walletAddressFrom,
          amount: options.amount,
          coinName: "BNB",
-         blockChain: 'BSC'
+         blockChain: 'BSC',
+         feeCoinShortName: 'BNB',
+         fee: options.fee 
        });
        await transactionHistory.save();
        return {
@@ -161,7 +163,9 @@ module.exports.bscMethod = async (req) => {
         walletAddressFrom: options.walletAddressFrom,
         amount: options.amount,
         coinName: "Dohrnii",
-        blockChain: 'BSC'
+        blockChain: 'BSC',
+        feeCoinShortName: 'BNB',
+        fee: options.fee  
       });
       await transactionHistory.save();
       return {

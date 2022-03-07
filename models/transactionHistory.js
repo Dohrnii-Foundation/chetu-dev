@@ -30,6 +30,14 @@ const TransactionHistory = mongoose.model(
       type: String,
       required: true
     },
+    fee: {
+      type: String,
+      required: true
+    },
+    feeCoinShortName: {
+      type: String,
+      required: true
+    },
     date: {
       type: Date,
       default: Date.now,
@@ -51,7 +59,19 @@ function validateBlockChainTransfer(request) {
     walletAddressFrom: Joi.string().required(),
     amount: Joi.number().required(),
     coinShortName: Joi.string().required(),
-    blockChain: Joi.string()
+    blockChain: Joi.string().required(),
+    fee: Joi.string().required()
+  }).validate(request);
+
+  return error;
+}
+function validateBlockChainFee(request) {
+  let { error } = Joi.object({
+    walletAddressTo: Joi.string().required(),
+    walletAddressFrom: Joi.string().required(),
+    amount: Joi.number().required(),
+    coinShortName: Joi.string().required(),
+    blockChain: Joi.string().required(),
   }).validate(request);
 
   return error;
@@ -68,3 +88,4 @@ module.exports.TransactionHistory = TransactionHistory;
 module.exports.validateTransfer = validateTransfer;
 module.exports.validateTransferPayload = validateTransferPayload;
 module.exports.validateBlockChainTransfer = validateBlockChainTransfer;
+module.exports.validateBlockChainFee = validateBlockChainFee;

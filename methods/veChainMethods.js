@@ -91,7 +91,9 @@ module.exports.veChainMethod = async (req) => {
           walletAddressFrom: options.walletAddressFrom,
           amount: options.amount,
           coinName: "Dohrnii",
-          blockChain: 'VECHAIN'
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: options.fee  
         });
         await transactionHistory.save();
         return {
@@ -156,7 +158,9 @@ module.exports.veChainMethod = async (req) => {
           walletAddressFrom: options.walletAddressFrom,
           amount: options.amount,
           coinName: "VeChain",
-          blockChain: 'VECHAIN'
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: options.fee  
         });
         await transactionHistory.save();
         return {
@@ -220,7 +224,9 @@ module.exports.veChainMethod = async (req) => {
     walletAddressFrom: options.walletAddressFrom,
     amount: options.amount,
     coinName: "VeThor Token",
-    blockChain: 'VECHAIN'
+    blockChain: 'VECHAIN',
+    feeCoinShortName: 'VTHO',
+    fee: options.fee  
   });
   await transactionHistory.save();
   return {

@@ -88,7 +88,9 @@ module.exports.ethereumMethod = async (req) => {
          walletAddressFrom: options.walletAddressFrom,
          amount: options.amount,
          coinName: "Ethereum",
-         blockChain: 'ETHEREUM' 
+         blockChain: 'ETHEREUM',
+         feeCoinShortName: 'ETH',
+         fee: options.fee  
        });
        await transactionHistory.save();
        return {
@@ -160,7 +162,9 @@ module.exports.ethereumMethod = async (req) => {
          walletAddressFrom: options.walletAddressFrom,
          amount: options.amount,
          coinName: "Dohrnii",
-         blockChain: 'ETHEREUM'
+         blockChain: 'ETHEREUM',
+         feeCoinShortName: 'ETH',
+         fee: options.fee 
        });
        await transactionHistory.save();
        return {
