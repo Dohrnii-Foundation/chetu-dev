@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const debug = require("debug")("app:startup");
 const cors = require("cors");
+require('dotenv').config()
 require("./db/db");
 app.use(express.json());
 app.use(cors());
@@ -23,7 +24,7 @@ app.use("/v1/setting", require('./routes/setting'));
 
 
 
-const port = process.env.port || 8080;
+const port = process.env.PORT || 8080;
 app.listen(port, () => {
   debug(`Listening on port ${port}...`);
 });

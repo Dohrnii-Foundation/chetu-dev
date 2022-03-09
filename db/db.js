@@ -4,11 +4,7 @@ const dbDebug = require("debug")("app:db");
 
 mongoose
   .connect(
-    `mongodb+srv://${config.get("dbConfig.userName")}:${config.get(
-      "dbConfig.password"
-    )}@${config.get("dbConfig.host")}/${config.get(
-      "dbConfig.dbName"
-    )}?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@${process.env.HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`
   )
   .then(() => {
     dbDebug("Connected to DB...");
