@@ -224,87 +224,134 @@ module.exports.createTransfer = async (req) => {
     message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
   };
 };
+// /********** Fetch Wallet detail ************
+//  * @param {Object} options
+//  *
+//  * @return {Object} walletdetail
+//  *
+//  *********** Fetch Wallet detail ***********/
+// module.exports.walletDetail = async (req) => {
+//   const options = req.body;
+//   const error = validateWalletDetailPayload(options)
+//     if (error)
+//     return { result: false, status: 202, message: error.details[0].message };
+//   const seed = await Seed.find({
+//     _id: options.seedId,
+//   });
+//   if (seed.length === 0)
+//     return {
+//       result: false,
+//       status: 202,
+//       message: message.INVALID_SEED_ID,
+//     };
+
+//    let walletDetail = await WalletAddress.aggregate([
+//         {
+//           $match:
+//           {'walletAddress': options.walletAddress, }
+//         },
+//         {
+//         $lookup:
+//          {
+//         from: 'tokens',
+//         localField: 'walletAddress',
+//         foreignField:'walletAddress',
+//         as: 'tokenData'
+//          }
+//         },
+//       ])
+//       let walletBalance = await WalletAddress.aggregate([
+//         {
+//           $match:
+//           {'walletAddress': options.walletAddress, }
+//         },
+//         {
+//           $lookup:
+//            {
+//           from: 'tokens',
+//           localField: 'walletAddress',
+//           foreignField:'walletAddress',
+//           as: 'tokenDataForSum'
+//            }
+//           },
+//           { "$project": {
+//             "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
+//           }} 
+//       ])
+//    if(walletDetail.length == 0)
+//    return {
+//     result: true,
+//     status: 200,
+//     message: message.NO_RECORD_FOUND,
+//    }
+//   return {
+//     result: true,
+//     status: 200,
+//     message: message.FETCH_SUCCESSFULLY,
+//     walletAddress: walletDetail[0].walletAddress,
+//     walletName: walletDetail[0].walletName,
+//     qrCode: walletDetail[0].qrCode,
+//     balance: walletBalance[0].total,
+//    data: walletDetail[0].tokenData.map((el,i) => {
+//     return {
+//         coinId: i +1,
+//         coinIcon: el.coinIcon,
+//         coinName: el.coinName,
+//         coinShortName: el.coinShortName,
+//         coinValue: el.coinValue,
+//         coinUsdValue: el.coinUsdValue,
+//         coinStandard: el.coinStandard,
+//         blockChain: el.blockChain
+//     }
+//   })
+//   };
+// };
+
 /********** Fetch Wallet detail ************
  * @param {Object} options
  *
  * @return {Object} walletdetail
  *
  *********** Fetch Wallet detail ***********/
-module.exports.walletDetail = async (req) => {
+ module.exports.walletDetail = async (req) => {
   const options = req.body;
   const error = validateWalletDetailPayload(options)
     if (error)
     return { result: false, status: 202, message: error.details[0].message };
-  const seed = await Seed.find({
-    _id: options.seedId,
+  const walletDetail = await WalletAddress.find({
+    walletAddress: options.walletAddress,
   });
-  if (seed.length === 0)
+  if (walletDetail.length === 0)
     return {
       result: false,
       status: 202,
-      message: message.INVALID_SEED_ID,
+      message: message.INVALID_WALLET_ADDRESS,
     };
-
-   let walletDetail = await WalletAddress.aggregate([
-        {
-          $match:
-          {'walletAddress': options.walletAddress, }
-        },
-        {
-        $lookup:
-         {
-        from: 'tokens',
-        localField: 'walletAddress',
-        foreignField:'walletAddress',
-        as: 'tokenData'
-         }
-        },
-      ])
-      let walletBalance = await WalletAddress.aggregate([
-        {
-          $match:
-          {'walletAddress': options.walletAddress, }
-        },
-        {
-          $lookup:
-           {
-          from: 'tokens',
-          localField: 'walletAddress',
-          foreignField:'walletAddress',
-          as: 'tokenDataForSum'
-           }
-          },
-          { "$project": {
-            "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
-          }} 
-      ])
-   if(walletDetail.length == 0)
-   return {
-    result: true,
-    status: 200,
-    message: message.NO_RECORD_FOUND,
-   }
-  return {
-    result: true,
-    status: 200,
-    message: message.FETCH_SUCCESSFULLY,
-    walletAddress: walletDetail[0].walletAddress,
-    walletName: walletDetail[0].walletName,
-    qrCode: walletDetail[0].qrCode,
-    balance: walletBalance[0].total,
-   data: walletDetail[0].tokenData.map((el,i) => {
-    return {
-        coinId: i +1,
-        coinIcon: el.coinIcon,
-        coinName: el.coinName,
-        coinShortName: el.coinShortName,
-        coinValue: el.coinValue,
-        coinUsdValue: el.coinUsdValue,
-        coinStandard: el.coinStandard,
-        blockChain: el.blockChain
+    let filterValue = []
+    let tokenValue = await Promise.all([
+                          ethereum.ethereumToken(options.walletAddress, "ETH"),
+                          ethereum.ethereumToken(options.walletAddress, "DHN"),
+                          veChain.veChainToken(options.walletAddress, "VET"),
+                          veChain.veChainToken(options.walletAddress, "VTHO"),
+                          veChain.veChainToken(options.walletAddress, "DHN"),
+                          bsc.bscToken(options.walletAddress, "BNB"),
+                          bsc.bscToken(options.walletAddress, "DHN")
+                        ])
+                        
+    for(const el of tokenValue){
+      filterValue.push(el.coinUsdValue)
     }
-  })
-  };
+    let balance = filterValue.reduce((a, b) => a + b, 0)
+    return {
+      result: true,
+      status: 200,
+      message: message.FETCH_SUCCESSFULLY,
+      walletAddress: walletDetail[0].walletAddress,
+      walletName: walletDetail[0].walletName,
+      qrCode: walletDetail[0].qrCode,
+      balance: balance,
+      data: tokenValue
+    }; 
 };
 /********** Fetch Wallet List ************
  * @param {Object} options

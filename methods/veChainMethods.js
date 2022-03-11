@@ -303,3 +303,75 @@ module.exports.veChainGas = async (req) => {
      }
     }
  } 
+ module.exports.veChainToken = async (walletAddress,coinShortName) => {
+
+      let coinShortNameReturn = await validateCoinShortNameVechain(coinShortName);
+      if(coinShortNameReturn == 'INVALID')
+      return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
+       
+    const wallet = new SimpleWallet();
+    const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
+    const connex = new Framework(Framework.guardDriver(driver))
+    if(coinShortName == 'DHN'){
+      const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
+      const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
+      let senderBalance = await balanceOfMethod.call(walletAddress)
+    try{
+      let coinBalance = Number(senderBalance.decoded.balance)
+      let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                 
+      return {
+        coinId: 5,
+        coinIcon: "api.dohrniiwallet.ch/dai.png",
+        coinName: "Dohrnii",
+        coinShortName: "DHN",
+        coinValue: coinBalance,
+        coinUsdValue: coinValueUsd,
+        coinStandard: "VET",
+        blockChain: "VECHAIN"
+      };
+    }catch(err){
+      return { result: false, status: 202, message:err.message }
+    }      
+  } else if(coinShortName == 'VET') {
+          const senderAccount = connex.thor.account(walletAddress)
+          let senderDetail = await senderAccount.get() 
+          let senderBalance = web3.utils.toBN(senderDetail.balance).toString()
+      try{
+      let coinBalance = Number(web3.utils.fromWei(senderBalance, 'ether'));
+       let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                   
+      return {
+        coinId: 3,
+        coinIcon: "api.dohrniiwallet.ch/veChain.png",
+        coinName: "VeChain",
+        coinShortName: "VET",
+        coinValue: coinBalance,
+        coinUsdValue: coinValueUsd,
+        coinStandard: "",
+        blockChain: "VECHAIN"
+      };    
+         } catch(err){
+          return { result: false, status: 202, message:err.message }
+         }    
+  } else if(coinShortName == 'VTHO') {
+    const senderAccount = connex.thor.account(walletAddress)
+    let senderDetail = await senderAccount.get() 
+    let senderEnergy = web3.utils.toBN(senderDetail.energy).toString()
+try{
+  let coinBalance = Number(web3.utils.fromWei(senderEnergy, 'ether'))
+  let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)               
+return {
+        coinId: 4,
+        coinIcon: "api.dohrniiwallet.ch/veThor.png",
+        coinName: "VeThor Token",
+        coinShortName: "VTHO",
+        coinValue: coinBalance,
+        coinUsdValue: coinValueUsd,
+        coinStandard: "",
+        blockChain: "VECHAIN"
+  }; 
+    
+   } catch(err){
+    return { result: false, status: 202, message:err.message }
+   }    
+}     
+};

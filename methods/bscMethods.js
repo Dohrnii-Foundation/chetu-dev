@@ -227,3 +227,50 @@ module.exports.bscMethod = async (req) => {
        }
       }
    } 
+
+   module.exports.bscToken = async (walletAddress,coinShortName) => {
+
+        let coinShortNameReturn = await validateCoinShortNameBsc(coinShortName);
+        if(coinShortNameReturn == 'INVALID')
+        return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
+
+          if(coinShortName == 'BNB') {
+            let senderBalanceInWei = await web3.eth.getBalance(walletAddress)
+             try{
+         let senderBalanceInBnb = await web3.utils.fromWei(web3.utils.toBN(senderBalanceInWei).toString(), 'ether')
+         let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInBnb) )             
+  
+       return {
+        coinId: 6,
+        coinIcon: "api.dohrniiwallet.ch/bnb.png",
+        coinName: "BNB",
+        coinShortName: "BNB",
+        coinValue: Number(senderBalanceInBnb),
+        coinUsdValue: coinValueUsd,
+        coinStandard: "",
+        blockChain: "BSC"
+         };     
+             } catch(err){
+              return { result: false, status: 202, message:err.message }
+             }
+    }else if(coinShortName == 'DHN'){
+      const contractDHN = new web3.eth.Contract(contractabiDHN,contractAddressDHN, { from: walletAddress });
+      let senderBalance = await contractDHN.methods.balanceOf(walletAddress).call();
+    try{
+        let senderBalanceInBnb = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
+        let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInBnb))              
+      return {
+        coinId: 7,
+        coinIcon: "api.dohrniiwallet.ch/dai.png",
+        coinName: "Dohrnii",
+        coinShortName: "DHN",
+        coinValue: Number(senderBalanceInBnb),
+        coinUsdValue: coinValueUsd,
+        coinStandard: "",
+        blockChain: "BSC"
+      };   
+    }catch(err){
+      return { result: false, status: 202, message:err.message }
+     } 
+    }
+  }

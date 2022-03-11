@@ -226,3 +226,50 @@ module.exports.ethereumMethod = async (req) => {
      }
     }
  } 
+
+ module.exports.ethereumToken = async (walletAddress,coinShortName) => {
+
+      let coinShortNameReturn = await validateCoinShortNameEthereum(coinShortName);
+      if(coinShortNameReturn == 'INVALID')
+      return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
+
+        if(coinShortName == 'ETH') {
+          let senderAccountInWei = await web3.eth.getBalance(walletAddress)
+           try{
+          let senderBalanceInEth = await web3.utils.fromWei(web3.utils.toBN(senderAccountInWei).toString(), 'ether')
+      let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))                 
+     return {
+        coinId: 1,
+        coinIcon: "api.dohrniiwallet.ch/ether.PNG",
+        coinName: "Ethereum",
+        coinShortName: "ETH",
+        coinValue: Number(senderBalanceInEth),
+        coinUsdValue: coinValueUsd,
+        coinStandard: "",
+        blockChain: "ETHEREUM"
+       }; 
+           } catch(err){
+            return { result: false, status: 202, message:err.message }
+           }
+  }else if(coinShortName == 'DHN'){
+     const contractDHN = new web3.eth.Contract(contractabiDHN,contractAddressDHN, { from: walletAddress });
+     let senderBalance = await contractDHN.methods.balanceOf(walletAddress).call();
+   try{
+       let senderBalanceInEth = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
+     let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))
+     return {
+      coinId: 2,
+      coinIcon: "api.dohrniiwallet.ch/dai.png",
+      coinName: "Dohrnii",
+      coinShortName: "DHN",
+      coinValue: Number(senderBalanceInEth),
+      coinUsdValue: coinValueUsd,
+      coinStandard: "ERC-20",
+      blockChain: "ETHEREUM"
+     };
+    
+   }catch(err){
+     return { result: false, status: 202, message:err.message }
+    } 
+   }
+}
