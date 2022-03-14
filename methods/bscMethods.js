@@ -261,7 +261,7 @@ module.exports.bscMethod = async (req) => {
         let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInBnb))              
       return {
         coinId: 6,
-        coinIcon: "api.dohrniiwallet.ch/dai.png",
+        coinIcon: "api.dohrniiwallet.ch/dhn.png",
         coinName: "Dohrnii",
         coinShortName: "DHN",
         coinValue: Number(senderBalanceInBnb),

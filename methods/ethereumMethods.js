@@ -240,7 +240,7 @@ module.exports.ethereumMethod = async (req) => {
       let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))                 
      return {
         coinId: 5,
-        coinIcon: "api.dohrniiwallet.ch/ether.PNG",
+        coinIcon: "api.dohrniiwallet.ch/eth.png",
         coinName: "Ethereum",
         coinShortName: "ETH",
         coinValue: Number(senderBalanceInEth),
@@ -259,7 +259,7 @@ module.exports.ethereumMethod = async (req) => {
      let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))
      return {
       coinId: 4,
-      coinIcon: "api.dohrniiwallet.ch/dai.png",
+      coinIcon: "api.dohrniiwallet.ch/dhn.png",
       coinName: "Dohrnii",
       coinShortName: "DHN",
       coinValue: Number(senderBalanceInEth),

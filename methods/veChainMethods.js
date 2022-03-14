@@ -321,7 +321,7 @@ module.exports.veChainGas = async (req) => {
       let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                 
       return {
         coinId: 1,
-        coinIcon: "api.dohrniiwallet.ch/dai.png",
+        coinIcon: "api.dohrniiwallet.ch/dhn.png",
         coinName: "Dohrnii",
         coinShortName: "DHN",
         coinValue: coinBalance,
@@ -361,7 +361,7 @@ try{
   let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)               
 return {
         coinId: 3,
-        coinIcon: "api.dohrniiwallet.ch/veThor.png",
+        coinIcon: "api.dohrniiwallet.ch/vtho.png",
         coinName: "VeThor Token",
         coinShortName: "VTHO",
         coinValue: coinBalance,
