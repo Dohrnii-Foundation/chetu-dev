@@ -44,7 +44,7 @@ module.exports.createWalletByBSC = async (req) => {
       walletAddress: mnemonicWallet.address
     });
     if (wallet.length > 0)
-    return { result: false, status: 202, message: message.MULTIPLE_WALLET_NOT_SUPPORTED };
+    return { result: false, status: 202, message: message.COMMING_SOON };
  // let encryptedKey = CryptoJS.AES.encrypt(privateKey,config.get('secretKey') ).toString();
   let code = await generateQrCode(mnemonicWallet.address);
   let walletAddress = new WalletAddress({

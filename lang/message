@@ -18,6 +18,6 @@ module.exports = {
   UPDATE_SUCCESSFULLY: "Update Successfully",
   MAIL_SEND_SUCCESSFULLY: "Mail Send Successfully",
   MAIL_SEND_FAILED: "Mail Send Failed",
-  MULTIPLE_WALLET_NOT_SUPPORTED: "Multiple wallet not supported",
+  COMMING_SOON: "Coming soon",
   INVALID_RESTORE_TYPE: "Invalid Restore Type"
 };
