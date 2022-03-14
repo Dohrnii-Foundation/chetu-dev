@@ -337,7 +337,7 @@ module.exports.createTransfer = async (req) => {
                           bsc.bscToken(options.walletAddress, "BNB"),
                           bsc.bscToken(options.walletAddress, "DHN")
                         ])
-                        
+
     for(const el of tokenValue){
       filterValue.push(el.coinUsdValue)
     }
@@ -377,36 +377,34 @@ module.exports.walletList = async (req) => {
   let walletDetail = await WalletAddress.find({
     seedId: options.seedId
   });
-  let walletBalance = await WalletAddress.aggregate([
-    {
-      $match:
-      {'seedId': ObjectId(options.seedId), }
-    },
-    {
-      $lookup:
-       {
-      from: 'tokens',
-      localField: 'seedId',
-      foreignField:'seedId',
-      as: 'tokenDataForSum'
-       }
-      },
-      { "$project": {
-        "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
-      }} 
-  ])
-   if(walletDetail.length == 0)
+  if(walletDetail.length == 0)
    return {
     result: true,
     status: 200,
     message: message.NO_RECORD_FOUND,
    }
+  let filterValue = []
+  let tokenValue = await Promise.all([
+                        ethereum.ethereumToken(walletDetail[0].walletAddress, "ETH"),
+                        ethereum.ethereumToken(walletDetail[0].walletAddress, "DHN"),
+                        veChain.veChainToken(walletDetail[0].walletAddress, "VET"),
+                        veChain.veChainToken(walletDetail[0].walletAddress, "VTHO"),
+                        veChain.veChainToken(walletDetail[0].walletAddress, "DHN"),
+                        bsc.bscToken(walletDetail[0].walletAddress, "BNB"),
+                        bsc.bscToken(walletDetail[0].walletAddress, "DHN")
+                      ])
+                      
+  for(const el of tokenValue){
+    filterValue.push(el.coinUsdValue)
+  }
+  let balance = filterValue.reduce((a, b) => a + b, 0)
+   
    let mappedWalletDetail = walletDetail.map(el=>{
     return{
       walletAddress: el.walletAddress,
       walletName: el.walletName,
       qrCode: el.qrCode,
-      balance: walletBalance[0].total
+      balance: balance
     }
   })
   return {
