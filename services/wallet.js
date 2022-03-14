@@ -328,14 +328,14 @@ module.exports.createTransfer = async (req) => {
       message: message.INVALID_WALLET_ADDRESS,
     };
     let filterValue = []
-    let tokenValue = await Promise.all([
-                          ethereum.ethereumToken(options.walletAddress, "ETH"),
-                          ethereum.ethereumToken(options.walletAddress, "DHN"),
+    let tokenValue = await Promise.all([  
+                          veChain.veChainToken(options.walletAddress, "DHN"),                      
                           veChain.veChainToken(options.walletAddress, "VET"),
                           veChain.veChainToken(options.walletAddress, "VTHO"),
-                          veChain.veChainToken(options.walletAddress, "DHN"),
-                          bsc.bscToken(options.walletAddress, "BNB"),
-                          bsc.bscToken(options.walletAddress, "DHN")
+                          ethereum.ethereumToken(options.walletAddress, "DHN"),
+                          ethereum.ethereumToken(options.walletAddress, "ETH"),
+                          bsc.bscToken(options.walletAddress, "DHN"),
+                          bsc.bscToken(options.walletAddress, "BNB") 
                         ])
 
     for(const el of tokenValue){

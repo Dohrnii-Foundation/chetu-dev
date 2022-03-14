@@ -241,7 +241,7 @@ module.exports.bscMethod = async (req) => {
          let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInBnb) )             
   
        return {
-        coinId: 6,
+        coinId: 7,
         coinIcon: "api.dohrniiwallet.ch/bnb.png",
         coinName: "BNB",
         coinShortName: "BNB",
@@ -260,7 +260,7 @@ module.exports.bscMethod = async (req) => {
         let senderBalanceInBnb = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
         let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInBnb))              
       return {
-        coinId: 7,
+        coinId: 6,
         coinIcon: "api.dohrniiwallet.ch/dai.png",
         coinName: "Dohrnii",
         coinShortName: "DHN",

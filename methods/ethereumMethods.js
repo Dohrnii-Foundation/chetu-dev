@@ -239,7 +239,7 @@ module.exports.ethereumMethod = async (req) => {
           let senderBalanceInEth = await web3.utils.fromWei(web3.utils.toBN(senderAccountInWei).toString(), 'ether')
       let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))                 
      return {
-        coinId: 1,
+        coinId: 5,
         coinIcon: "api.dohrniiwallet.ch/ether.PNG",
         coinName: "Ethereum",
         coinShortName: "ETH",
@@ -258,7 +258,7 @@ module.exports.ethereumMethod = async (req) => {
        let senderBalanceInEth = await web3.utils.fromWei(web3.utils.toBN(senderBalance).toString(),'ether')
      let coinValueUsd = await coinUsdValue(coinShortName,Number(senderBalanceInEth))
      return {
-      coinId: 2,
+      coinId: 4,
       coinIcon: "api.dohrniiwallet.ch/dai.png",
       coinName: "Dohrnii",
       coinShortName: "DHN",

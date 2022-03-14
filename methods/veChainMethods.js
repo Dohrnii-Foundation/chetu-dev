@@ -320,7 +320,7 @@ module.exports.veChainGas = async (req) => {
       let coinBalance = Number(senderBalance.decoded.balance)
       let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                 
       return {
-        coinId: 5,
+        coinId: 1,
         coinIcon: "api.dohrniiwallet.ch/dai.png",
         coinName: "Dohrnii",
         coinShortName: "DHN",
@@ -340,7 +340,7 @@ module.exports.veChainGas = async (req) => {
       let coinBalance = Number(web3.utils.fromWei(senderBalance, 'ether'));
        let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                   
       return {
-        coinId: 3,
+        coinId: 2,
         coinIcon: "api.dohrniiwallet.ch/veChain.png",
         coinName: "VeChain",
         coinShortName: "VET",
@@ -360,7 +360,7 @@ try{
   let coinBalance = Number(web3.utils.fromWei(senderEnergy, 'ether'))
   let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)               
 return {
-        coinId: 4,
+        coinId: 3,
         coinIcon: "api.dohrniiwallet.ch/veThor.png",
         coinName: "VeThor Token",
         coinShortName: "VTHO",
