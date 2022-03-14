@@ -37,7 +37,7 @@ const transporter = nodemailer.createTransport({
  
 let mailOptions = {
   from: "chetuanmol0801@gmail.com", 
-  to: "saquibm@chetu.com", 
+  to: "info@dohrnii.org", 
   subject: `Query from ${option.walletAddress} user`, 
   text: option.message // body of email
 };
