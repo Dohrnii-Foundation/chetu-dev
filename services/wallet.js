@@ -565,13 +565,35 @@ module.exports.walletTransactionHistory = async (req) => {
       let wallet = await WalletAddress.find({
         walletAddress: mnemonicWallet.address
       });
-      if (wallet.length == 0)
-      return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+      if (wallet.length == 0){
+        //insert new wallet address in db
+        let seed = new Seed({
+          seedPhrases: ['1','2'],
+          seedString: "recoverd from mnemonic"
+        });
+        let { _id} = await seed.save();
+        let walletAddress = new WalletAddress({
+          seedId: _id,
+          walletName: 'Dohrnii',
+          walletAddress: mnemonicWallet.address,
+          privateKey: mnemonicWallet.privateKey,
+          qrCode: 'qrCode'
+        });
+        const value = await walletAddress.save();
+        return {
+          result: true,
+          status: 200,
+          message: message.FETCH_SUCCESSFULLY,
+          seedId: _id,
+          walletAddress: value.walletAddress
+        }
+      }
+
       return {
         result: true,
         status: 200,
         message: message.FETCH_SUCCESSFULLY,
-        seedId:wallet[0].seedId,
+        seedId: wallet[0].seedId,
         walletAddress: wallet[0].walletAddress
       }
     } else {
@@ -581,13 +603,34 @@ module.exports.walletTransactionHistory = async (req) => {
       let wallet = await WalletAddress.find({
         walletAddress: derivedWallet.address
       });
-      if (wallet.length == 0)
-      return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+      if (wallet.length == 0) {
+          //insert new wallet address in db
+        let seed = new Seed({
+          seedPhrases: ['1','2'],
+          seedString: "recoverd from privateKey"
+        });
+        let { _id} = await seed.save();
+        let walletAddress = new WalletAddress({
+          seedId: _id,
+          walletName: 'Dohrnii',
+          walletAddress: derivedWallet.address,
+          privateKey: privateKey,
+          qrCode: 'qrCode'
+        });
+        const value = await walletAddress.save();
+        return {
+          result: true,
+          status: 200,
+          message: message.FETCH_SUCCESSFULLY,
+          seedId: _id,
+          walletAddress: value.walletAddress
+        }
+      }
       return {
         result: true,
         status: 200,
         message: message.FETCH_SUCCESSFULLY,
-        seedId:wallet[0].seedId,
+        seedId: wallet[0].seedId,
         walletAddress: wallet[0].walletAddress
       }
     } catch(err){
