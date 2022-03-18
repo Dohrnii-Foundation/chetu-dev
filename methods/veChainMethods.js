@@ -12,10 +12,10 @@ const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
 const { Framework } = require('@vechain/connex-framework');
 const { TransactionHistory, validateBlockChainTransfer } = require("../models/transactionHistory");
 const { WalletAddress } = require("../models/walletAddress");
-const { Token } = require("../models/token");
 const message = require("../lang/message");
 const { coinUsdValue,validateCoinShortNameVechain } = require("../helper/helper");
 const { Transaction } = require('thor-devkit');
+const CryptoJS = require("crypto-js");
 
 module.exports.veChainMethod = async (req) => {
 
@@ -36,21 +36,24 @@ module.exports.veChainMethod = async (req) => {
         status: 202,
         message: message.INVALID_WALLET_ADDRESS,
       };
-      const addressTo = await WalletAddress.find({
-        walletAddress: options.walletAddressTo
-      });
-     let privateKey = addressFrom[0].privateKey;
+      let privateKey //= '0x857877a619dcef1b4467eca7b986ecab675f689e0385b63f540763308c2ae480'
+      if(options.encryptedPrivateKey){
+       let decyptedKey = CryptoJS.AES.decrypt(options.encryptedPrivateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString(CryptoJS.enc.Utf8);
+        privateKey = decyptedKey
+      }else{
+        privateKey = addressFrom[0].privateKey;
+      }
       let walletAddress = addressFrom[0].walletAddress;
       const wallet = new SimpleWallet();
       wallet.import(privateKey);
       const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
       const connex = new Framework(Framework.guardDriver(driver))
       if(coinShortName == 'DHN'){
+      //  const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
         const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
         const transferABI = { "constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}
         const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
         let senderBalance = await balanceOfMethod.call(walletAddress)
-        let receiverBalance = await balanceOfMethod.call(options.walletAddressTo)
   
         if(Number(senderBalance.decoded.balance) < options.amount)
         return { result: false, status: 202, message: message.INSUFFICIENT_BALANCE }
@@ -59,33 +62,7 @@ module.exports.veChainMethod = async (req) => {
         let t1 = transferMethod.asClause(options.walletAddressTo,options.amount)
         const signingService = connex.vendor.sign('tx', [t1]);
         let response = await signingService.request();
-        if(response){
-        let coinUpdatedValue = Number(senderBalance.decoded.balance) - options.amount 
-        let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)                 
-       let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'DHN',blockChain: 'VECHAIN' }; 
-       let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-               //Update database
-          await Token.findOneAndUpdate(
-          filter_from,
-          update_from,
-          {
-            new: true,
-          }
-        );
-        if(addressTo.length > 0){ 
-            let coinUpdatedValue = Number(receiverBalance.decoded.balance) + options.amount
-            let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'DHN',blockChain: 'VECHAIN' };
-            let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-            await Token.findOneAndUpdate(
-                filter_to,
-                update_to,
-                {
-                  new: true,
-                }
-              );
-        }
-   
+        if(response){             
         let transactionHistory = new TransactionHistory({
           walletAddressTo: options.walletAddressTo,
           walletAddressFrom: options.walletAddressFrom,
@@ -109,9 +86,6 @@ module.exports.veChainMethod = async (req) => {
             const senderAccount = connex.thor.account(walletAddress)
             let senderDetail = await senderAccount.get() 
             let senderBalance = web3.utils.toBN(senderDetail.balance).toString()
-            const receiverAccount = connex.thor.account(options.walletAddressTo)
-            let receiverDetail = await receiverAccount.get() 
-            let receiverBalance = web3.utils.toBN(receiverDetail.balance).toString()
              let amountInHex ="0x" + (options.amount * 10 **18).toString(16);
              let amount = web3.utils.toBN(amountInHex).toString()
              if(parseInt(senderBalance) < parseInt(amount))
@@ -126,32 +100,7 @@ module.exports.veChainMethod = async (req) => {
          };
         const signingService = connex.vendor.sign('tx', [payload]);
         let response = await signingService.request();
-        if(response){
-        let coinUpdatedValue = Number(web3.utils.fromWei(senderBalance, 'ether')) - options.amount;
-         let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)                   
-        let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VET',blockChain: 'VECHAIN' }; 
-        let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-             //Update database
-          await Token.findOneAndUpdate(
-          filter_from,
-          update_from,
-          {
-            new: true,
-          }
-        );
-        if(addressTo.length > 0){
-          let coinUpdatedValue = Number(web3.utils.fromWei(receiverBalance, 'ether')) + options.amount
-          let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-            let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VET',blockChain: 'VECHAIN' }; 
-            let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-            await Token.findOneAndUpdate(
-                filter_to,
-                update_to,
-                {
-                  new: true,
-                }
-              );
-        }
+        if(response){                
    
         let transactionHistory = new TransactionHistory({
           walletAddressTo: options.walletAddressTo,
@@ -177,9 +126,6 @@ module.exports.veChainMethod = async (req) => {
       const senderAccount = connex.thor.account(walletAddress)
       let senderDetail = await senderAccount.get() 
       let senderEnergy = web3.utils.toBN(senderDetail.energy).toString()
-      const receiverAccount = connex.thor.account(options.walletAddressTo)
-      let receiverDetail = await receiverAccount.get() 
-      let receiverEnergy = web3.utils.toBN(receiverDetail.energy).toString()
       let amountInHex ="0x" + (options.amount * 10 **18).toString(16);
       let amount = web3.utils.toBN(amountInHex).toString()
        if(Number(senderEnergy) < Number(amount))
@@ -192,32 +138,7 @@ module.exports.veChainMethod = async (req) => {
   const energyClause = transferMethod.asClause(options.walletAddressTo, amount)
   const signingService = connex.vendor.sign('tx', [energyClause]);
   let response = await signingService.request();
-  if(response){
-    let coinUpdatedValue = Number(web3.utils.fromWei(senderEnergy, 'ether')) - options.amount
-    let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)               
-    let filter_from = { walletAddress: options.walletAddressFrom, coinShortName: 'VTHO',blockChain: 'VECHAIN'  }; 
-    let update_from = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-       //Update database
-    await Token.findOneAndUpdate(
-    filter_from,
-    update_from,
-    {
-      new: true,
-    }
-  );
-  if(addressTo.length > 0){
-    let coinUpdatedValue = Number(web3.utils.fromWei(receiverEnergy, 'ether')) + options.amount
-    let coinValue = await coinUsdValue(coinShortName,coinUpdatedValue)
-    let filter_to = { walletAddress: options.walletAddressTo, coinShortName: 'VTHO',blockChain: 'VECHAIN' }; 
-    let update_to = { coinValue: coinUpdatedValue, coinUsdValue: coinValue };
-      await Token.findOneAndUpdate(
-          filter_to,
-          update_to,
-          {
-            new: true,
-          }
-        );
-  }
+  if(response){          
 
   let transactionHistory = new TransactionHistory({
     walletAddressTo: options.walletAddressTo,

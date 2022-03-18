@@ -24,7 +24,6 @@ const WalletAddress = mongoose.model(
     },
     privateKey: {
       type: String,
-      required: true
     },
     walletName: {
       type: String,

@@ -60,7 +60,8 @@ function validateBlockChainTransfer(request) {
     amount: Joi.number().required(),
     coinShortName: Joi.string().required(),
     blockChain: Joi.string().required(),
-    fee: Joi.string().required()
+    fee: Joi.string().required(),
+    encryptedPrivateKey: Joi.string()
   }).validate(request);
 
   return error;
