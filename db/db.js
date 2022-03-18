@@ -8,5 +8,10 @@ mongoose
   )
   .then(() => {
     dbDebug("Connected to DB...");
+    console.log("Connected to DB...");
   })
-  .catch((err) => dbDebug("Could not connect to DB", err));
+  .catch((err) => {
+    dbDebug("Could not connect to DB", err)
+    console.log("Could not connect to DB", err)
+  }
+    );
