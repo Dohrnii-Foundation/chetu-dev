@@ -45,7 +45,7 @@ module.exports.createWalletByBSC = async (req) => {
     });
     if (wallet.length > 0)
     return { result: false, status: 202, message: message.COMMING_SOON };
- // let encryptedKey = CryptoJS.AES.encrypt(privateKey,config.get('secretKey') ).toString();
+  const encryptedKey = CryptoJS.AES.encrypt(mnemonicWallet.privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
   let code = await generateQrCode(mnemonicWallet.address);
   let walletAddress = new WalletAddress({
     imei1: options.imei1,
@@ -55,7 +55,7 @@ module.exports.createWalletByBSC = async (req) => {
     walletName:options.walletName,
     walletAddress: mnemonicWallet.address,
     privateKey: mnemonicWallet.privateKey,
-    qrCode: code, 
+    qrCode: code,
   });
   const value = await walletAddress.save();
      // create default Tokens
@@ -149,6 +149,7 @@ module.exports.createWalletByBSC = async (req) => {
     walletAddress: mnemonicWallet.address,
     walletName: value.walletName,
     privateKey: value.privateKey,
+    encryptedPrivateKey: encryptedKey, 
     qrCode: code,
     balance: 0
   };
@@ -565,29 +566,32 @@ module.exports.walletTransactionHistory = async (req) => {
       let wallet = await WalletAddress.find({
         walletAddress: mnemonicWallet.address
       });
+      const encryptedKey = CryptoJS.AES.encrypt(mnemonicWallet.privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
       if (wallet.length == 0){
+        const encryptedKey = CryptoJS.AES.encrypt(mnemonicWallet.privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
         //insert new wallet address in db
-        // let seed = new Seed({
-        //   seedPhrases: ['1','2'],
-        //   seedString: "recoverd from mnemonic"
-        // });
-        // let { _id} = await seed.save();
-        // let walletAddress = new WalletAddress({
-        //   seedId: _id,
-        //   walletName: 'Dohrnii',
-        //   walletAddress: mnemonicWallet.address,
-        //   privateKey: mnemonicWallet.privateKey,
-        //   qrCode: 'qrCode'
-        // });
-        // const value = await walletAddress.save();
-        // return {
-        //   result: true,
-        //   status: 200,
-        //   message: message.FETCH_SUCCESSFULLY,
-        //   seedId: _id,
-        //   walletAddress: value.walletAddress
-        // }
-        return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+        let seed = new Seed({
+          seedPhrases: ['1','2'],
+          seedString: "recoverd from mnemonic"
+        });
+        let { _id} = await seed.save();
+        let walletAddress = new WalletAddress({
+          seedId: _id,
+          walletName: 'Dohrnii',
+          walletAddress: mnemonicWallet.address,
+          privateKey: mnemonicWallet.privateKey,
+          qrCode: 'qrCode'
+        });
+        const value = await walletAddress.save();
+        return {
+          result: true,
+          status: 200,
+          message: message.FETCH_SUCCESSFULLY,
+          seedId: _id,
+          walletAddress: value.walletAddress,
+          privateKey: mnemonicWallet.privateKey,
+          encryptedPrivateKey: encryptedKey,
+        }
       }
 
       return {
@@ -595,7 +599,9 @@ module.exports.walletTransactionHistory = async (req) => {
         status: 200,
         message: message.FETCH_SUCCESSFULLY,
         seedId: wallet[0].seedId,
-        walletAddress: wallet[0].walletAddress
+        walletAddress: wallet[0].walletAddress,
+        privateKey: mnemonicWallet.privateKey,
+        encryptedPrivateKey: encryptedKey
       }
     } else {
      try{
@@ -604,36 +610,41 @@ module.exports.walletTransactionHistory = async (req) => {
       let wallet = await WalletAddress.find({
         walletAddress: derivedWallet.address
       });
+      let encryptedKey = CryptoJS.AES.encrypt(privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
       if (wallet.length == 0) {
+       let encryptedKey = CryptoJS.AES.encrypt(privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
           //insert new wallet address in db
-        // let seed = new Seed({
-        //   seedPhrases: ['1','2'],
-        //   seedString: "recoverd from privateKey"
-        // });
-        // let { _id} = await seed.save();
-        // let walletAddress = new WalletAddress({
-        //   seedId: _id,
-        //   walletName: 'Dohrnii',
-        //   walletAddress: derivedWallet.address,
-        //   privateKey: privateKey,
-        //   qrCode: 'qrCode'
-        // });
-        // const value = await walletAddress.save();
-        // return {
-        //   result: true,
-        //   status: 200,
-        //   message: message.FETCH_SUCCESSFULLY,
-        //   seedId: _id,
-        //   walletAddress: value.walletAddress
-        // }
-        return { result: false, status: 202, message: message.NO_RECORD_FOUND };
+        let seed = new Seed({
+          seedPhrases: ['1','2'],
+          seedString: "recoverd from privateKey"
+        });
+        let { _id} = await seed.save();
+        let walletAddress = new WalletAddress({
+          seedId: _id,
+          walletName: 'Dohrnii',
+          walletAddress: derivedWallet.address,
+          privateKey: privateKey,
+          qrCode: 'qrCode',
+        });
+        const value = await walletAddress.save();
+        return {
+          result: true,
+          status: 200,
+          message: message.FETCH_SUCCESSFULLY,
+          seedId: _id,
+          walletAddress: value.walletAddress,
+          privateKey: privateKey,
+          encryptedPrivateKey: encryptedKey
+        }
       }
       return {
         result: true,
         status: 200,
         message: message.FETCH_SUCCESSFULLY,
         seedId: wallet[0].seedId,
-        walletAddress: wallet[0].walletAddress
+        walletAddress: wallet[0].walletAddress,
+        privateKey: privateKey,
+        encryptedPrivateKey: encryptedKey
       }
     } catch(err){
       return { result: false, status: 202, message: err.message };
@@ -706,7 +717,7 @@ module.exports.walletTransactionHistory = async (req) => {
  *
  *********** Test Route ***********/
  module.exports.test = async () => {
-        return { result: true, status: 200, message: "Wallet API works..."};    
+        return { result: true, status: 200, message: "Wallet API works!!!!!!!"};    
 };
 /********** Generate QrCode ************
  * @param {Object} address
