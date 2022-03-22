@@ -77,7 +77,7 @@ module.exports.coinUsdValue = async(coin,coinValue)=>{
         coinUsdValue = coinValue * obj.vthor
         break;
     case 'DHN': 
-        coinUsdValue = coinValue * obj.dai
+        coinUsdValue = 0 //coinValue * obj.dai
         break;
     case 'ETH': 
         coinUsdValue = coinValue * obj.eth
