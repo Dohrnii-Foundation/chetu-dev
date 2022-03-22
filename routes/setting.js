@@ -13,7 +13,7 @@ router.post("/supportmail", async (req, res, next) => {
   } catch (err) {
     console.log('mail error;;;;',err)
     res.status(202).send({
-      result: false, status: 202, message: err//message.MAIL_SEND_FAILED
+      result: false, status: 202, message: message.MAIL_SEND_FAILED
     })
     next(err);
   }
