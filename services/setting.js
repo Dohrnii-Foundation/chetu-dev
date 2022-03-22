@@ -30,6 +30,7 @@ module.exports.sendMailToSupport = async (req) => {
   let mailToSupport = new Support({
     message: options.message,
     walletAddress: options.walletAddress,
+    email: options.usermailId,
   });
       await mailToSupport.save();
   return { result: true, status: 200, message: message.MAIL_SEND_SUCCESSFULLY };

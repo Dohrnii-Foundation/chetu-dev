@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const CoinGecko = require('coingecko-api');
+const bcrypt = require('bcryptjs');
 
 module.exports.validateBlockChain = async(option) => {
     let blockChain
@@ -37,14 +38,15 @@ const transporter = nodemailer.createTransport({
  
 let mailOptions = {
   from: "chetuanmol0801@gmail.com", 
-  to: "info@dohrnii.org", 
+  to: 'info@dohrnii.org',//"info@dohrnii.org", 
   subject: `Query from ${option.walletAddress} user`, 
-  text: option.message // body of email
+  text: `user ${option.usermailId} has send the query:  ${option.message}` // body of email
 };
  return new Promise((resolve,reject)=>{
     transporter.sendMail(mailOptions, (error, information) => {
         if (error) {
-          reject(false)
+            console.log('error.message;;;',error.message)
+          reject(error.message)
         } else {
           resolve(true)
         }
@@ -163,4 +165,16 @@ module.exports.validateWalletRestoreType = async(type)=>{
       restoreType = 'INVALID'
       }
       return restoreType
+}
+module.exports.hashPassword = async(password)=>{
+    let salt = bcrypt.genSaltSync(10);
+    let hashPassword = bcrypt.hashSync(password, salt);
+    console.log('password;;;',password)
+    console.log('hashpassword;;;',hashPassword)
+    return hashPassword
+}
+module.exports.comparePassword = async(password,hash)=>{
+    let result = bcrypt.compareSync(password,hash);
+    console.log('result;;;',result)
+    return result
 }
