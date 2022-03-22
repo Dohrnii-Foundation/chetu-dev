@@ -49,17 +49,17 @@ module.exports.veChainMethod = async (req) => {
       const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
       const connex = new Framework(Framework.guardDriver(driver))
       if(coinShortName == 'DHN'){
-      //  const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
+       // const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
         const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
         const transferABI = { "constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_amount","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}
         const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
         let senderBalance = await balanceOfMethod.call(walletAddress)
-  
-        if(Number(senderBalance.decoded.balance) < options.amount)
+        let amountInWei = await web3.utils.toWei((options.amount).toString(), 'ether');
+        if(parseInt(senderBalance.decoded.balance) < parseInt(amountInWei))
         return { result: false, status: 202, message: message.INSUFFICIENT_BALANCE }
       try{
         const transferMethod = connex.thor.account(contractAddressVECHAIN).method(transferABI);
-        let t1 = transferMethod.asClause(options.walletAddressTo,options.amount)
+        let t1 = transferMethod.asClause(options.walletAddressTo,amountInWei)
         const signingService = connex.vendor.sign('tx', [t1]);
         let response = await signingService.request();
         if(response){             
@@ -234,12 +234,14 @@ module.exports.veChainGas = async (req) => {
     const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
     const connex = new Framework(Framework.guardDriver(driver))
     if(coinShortName == 'DHN'){
+      //const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
       const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
       const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
       let senderBalance = await balanceOfMethod.call(walletAddress)
+      let senderBalanceInVet = await web3.utils.fromWei(web3.utils.toBN(senderBalance.decoded.balance).toString(), 'ether')
     try{
-      let coinBalance = Number(senderBalance.decoded.balance)
-      let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)                 
+      let coinBalance = Number(senderBalanceInVet)
+      let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)              
       return {
         coinId: 1,
         coinIcon: "api.dohrniiwallet.ch/dhn.png",
