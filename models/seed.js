@@ -9,12 +9,20 @@ const Seed = mongoose.model(
       required: true,
     },
     isVerified: {
-      type: String,
-      default: "N",
+      type: Boolean,
+      default: false
     },
     seedString:{
       type: String,
       required: true
+    },
+    walletCreated:{
+      type: Boolean,
+      default: false
+    },
+    userId:{
+      type: mongoose.Types.ObjectId,
+     // required: true
     },
     date: {
       type: Date,
@@ -25,7 +33,7 @@ const Seed = mongoose.model(
 
 function validateSeed(seed) {
   let { error } = Joi.object({
-    seeds: Joi.array().required(),
+    userId: Joi.string().required(),
   }).validate(seed);
 
   return error;
