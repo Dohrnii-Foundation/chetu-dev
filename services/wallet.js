@@ -5,7 +5,7 @@ const { validateTransferPayload,
   TransactionHistory,
   validateTransfer,
   validateBlockChainTransfer,validateBlockChainFee  } = require("../models/transactionHistory");
-const { Token } = require("../models/token");
+const { User } = require("../models/user");
 const debug = require("debug")("app:walletlog");
 const { Seed } = require("../models/seed");
 const CryptoJS = require("crypto-js");
@@ -36,15 +36,10 @@ module.exports.createWalletByBSC = async (req) => {
   });
   if (seed.length === 0)
     return { result: false, status: 202, message: message.SEED_NOT_VERIFIED };
-    if(bip39.validateMnemonic(seed[0].seedString)==false){
-      return {result: false, status: 202, message: message.INVALID_SEED }
-    }
-    let mnemonicWallet = ethers.Wallet.fromMnemonic(seed[0].seedString);
-    let wallet = await WalletAddress.find({
-      walletAddress: mnemonicWallet.address
-    });
-    if (wallet.length > 0)
+    if (seed[0].walletCreated == true)
     return { result: false, status: 202, message: message.COMMING_SOON };
+  
+    let mnemonicWallet = ethers.Wallet.fromMnemonic(seed[0].seedString);
   const encryptedKey = CryptoJS.AES.encrypt(mnemonicWallet.privateKey, process.env.SECRET_KEY_FOR_PRIVATE_KEY).toString();
   let code = await generateQrCode(mnemonicWallet.address);
   let walletAddress = new WalletAddress({
@@ -54,101 +49,26 @@ module.exports.createWalletByBSC = async (req) => {
     seedId: options.seedId,
     walletName:options.walletName,
     walletAddress: mnemonicWallet.address,
-    privateKey: mnemonicWallet.privateKey,
+   // userId: options.userId,
     qrCode: code,
   });
   const value = await walletAddress.save();
-     // create default Tokens
-       await Token.insertMany([
-     {
-    coinName: "Ethereum",
-    coinShortName: "ETH",
-    coinIcon: `${req.headers.host}/ether.PNG`,//"https://dohrniifoundationi2-qa.chetu.com/ether.PNG",
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "ETHEREUM"
-  },
-  {
-    coinName: "Dohrnii",
-    coinShortName: "DHN",
-    coinIcon: `${req.headers.host}/dai.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"ERC-20",
-    blockChain: "ETHEREUM"
-  },
-  {
-    coinName: "VeChain",
-    coinShortName: "VET",
-    coinIcon: `${req.headers.host}/veChain.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "VECHAIN"
-  },
-  {
-    coinName: "VeThor Token",
-    coinShortName: "VTHO",
-    coinIcon: `${req.headers.host}/veThor.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "VECHAIN"
-  },
-  {
-    coinName: "Dohrnii",
-    coinShortName: "DHN",
-    coinIcon: `${req.headers.host}/dai.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"VET",
-    blockChain: "VECHAIN"
-  },
-  {
-    coinName: "BNB",
-    coinShortName: "BNB",
-    coinIcon: `${req.headers.host}/bnb.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "BSC"
-  },
-  {
-    coinName: "Dohrnii",
-    coinShortName: "DHN",
-    coinIcon: `${req.headers.host}/dai.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "BSC"
-  },
-  {
-    coinName: "Polygon",
-    coinShortName: "MATIC",
-    coinIcon: `${req.headers.host}/matic.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "POLYGON"
-  },
-  {
-    coinName: "Dohrnii",
-    coinShortName: "DHN",
-    coinIcon: `${req.headers.host}/dai.png`,
-    seedId: options.seedId,
-    walletAddress: mnemonicWallet.address,
-    coinStandard:"",
-    blockChain: "POLYGON"
-  }
-  ]);
+  const filter = { _id: options.seedId };
+  const update = { seedPhrases: ['1','2'],seedString:"wallet created",walletCreated:true };
+   await Seed.findOneAndUpdate(
+    filter,
+    update,
+    {
+      new: true,
+    }
+  );
   return {
     result: true,
     status: 200,
     message: message.WALLET_CREATED_SUCCESSFULLY,
     walletAddress: mnemonicWallet.address,
     walletName: value.walletName,
-    privateKey: value.privateKey,
+    privateKey: mnemonicWallet.privateKey,
     encryptedPrivateKey: encryptedKey, 
     qrCode: code,
     balance: 0
@@ -365,6 +285,19 @@ module.exports.walletList = async (req) => {
   const error = validateWalletListPayload(options)
     if (error)
     return { result: false, status: 202, message: error.details[0].message };
+  //   const user = await User.find({
+  //     _id: options.userId,
+  //   });
+  //   if (user.length === 0)
+  //     return {
+  //       result: false,
+  //       status: 202,
+  //       message: message.INVALID_USER_ID,
+  //     };
+
+  // let walletDetail = await WalletAddress.find({
+  //   seedId: options.seedId
+  // });
   const seed = await Seed.find({
     _id: options.seedId,
   });
@@ -572,14 +505,17 @@ module.exports.walletTransactionHistory = async (req) => {
         //insert new wallet address in db
         let seed = new Seed({
           seedPhrases: ['1','2'],
-          seedString: "recoverd from mnemonic"
+          seedString: "recoverd from mnemonic",
+         // userId: options.userId,
+          isVerified: true,
+          walletCreated: true,
         });
         let { _id} = await seed.save();
         let walletAddress = new WalletAddress({
           seedId: _id,
           walletName: 'Dohrnii',
           walletAddress: mnemonicWallet.address,
-          privateKey: mnemonicWallet.privateKey,
+         // userId: options.userId,
           qrCode: 'qrCode'
         });
         const value = await walletAddress.save();
@@ -616,14 +552,17 @@ module.exports.walletTransactionHistory = async (req) => {
           //insert new wallet address in db
         let seed = new Seed({
           seedPhrases: ['1','2'],
-          seedString: "recoverd from privateKey"
+          seedString: "recoverd from privateKey",
+        //  userId: options.userId,
+          isVerified: true,
+          walletCreated: true,
         });
         let { _id} = await seed.save();
         let walletAddress = new WalletAddress({
           seedId: _id,
           walletName: 'Dohrnii',
           walletAddress: derivedWallet.address,
-          privateKey: privateKey,
+         // userId: options.userId,
           qrCode: 'qrCode',
         });
         const value = await walletAddress.save();
