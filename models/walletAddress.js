@@ -37,6 +37,10 @@ const WalletAddress = mongoose.model(
       type: Number,
       default: 0,
     },
+    userId: {
+      type: mongoose.Types.ObjectId,
+      // required: true 
+    },
     date: {
       type: Date,
       default: Date.now,
@@ -51,6 +55,7 @@ function validateRequest(request) {
     deviceName: Joi.string(),
     walletName: Joi.string().required(),
     seedId: Joi.string().required(),
+    userId: Joi.string(),
   }).validate(request);
 
   return error;
@@ -65,7 +70,7 @@ function validateWalletDetailPayload(request) {
 }
 function validateWalletListPayload(request) {
   let { error } = Joi.object({
-    seedId: Joi.string().required(),
+    seedId: Joi.string().required(), // userId: Joi.string().required(),
   }).validate(request);
 
   return error;
@@ -82,6 +87,7 @@ function validateRestoreWalletPayload(request) {
   let { error } = Joi.object({
     restoreType: Joi.string().required(),
     restorePayload: Joi.string().required(),
+    userId:  Joi.string(),
   }).validate(request);
 
   return error;
