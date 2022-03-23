@@ -19,5 +19,8 @@ module.exports = {
   MAIL_SEND_SUCCESSFULLY: "Mail Send Successfully",
   MAIL_SEND_FAILED: "Mail Send Failed",
   COMMING_SOON: "Coming soon",
-  INVALID_RESTORE_TYPE: "Invalid Restore Type"
+  INVALID_RESTORE_TYPE: "Invalid Restore Type",
+  CREATE_SUCCESSFULLY: "Create Successfully",
+  INVALID_USER_ID: "Invalid User Id",
+  INVALID_PASSWORD: "Invalid Password",
 };
