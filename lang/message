@@ -18,7 +18,7 @@ module.exports = {
   UPDATE_SUCCESSFULLY: "Update Successfully",
   MAIL_SEND_SUCCESSFULLY: "Mail Send Successfully",
   MAIL_SEND_FAILED: "Mail Send Failed",
-  COMMING_SOON: "Coming soon",
+  COMMING_SOON: "You will soon be able to add multiple wallets. Stay tuned",
   INVALID_RESTORE_TYPE: "Invalid Restore Type",
   CREATE_SUCCESSFULLY: "Create Successfully",
   INVALID_USER_ID: "Invalid User Id",
