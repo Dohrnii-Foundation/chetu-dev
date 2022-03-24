@@ -190,7 +190,7 @@ module.exports.bscMethod = async (req) => {
         coinShortName: "BNB",
         coinValue: Number(senderBalanceInBnb),
         coinUsdValue: coinValueUsd,
-        coinStandard: "",
+        coinStandard: "BEP-20",
         blockChain: "BSC"
          };     
              } catch(err){

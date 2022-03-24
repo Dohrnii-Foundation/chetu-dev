@@ -269,7 +269,7 @@ module.exports.veChainGas = async (req) => {
         coinShortName: "VET",
         coinValue: coinBalance,
         coinUsdValue: coinValueUsd,
-        coinStandard: "",
+        coinStandard: "VET",
         blockChain: "VECHAIN"
       };    
          } catch(err){
@@ -289,7 +289,7 @@ return {
         coinShortName: "VTHO",
         coinValue: coinBalance,
         coinUsdValue: coinValueUsd,
-        coinStandard: "",
+        coinStandard: "VET",
         blockChain: "VECHAIN"
   }; 
     

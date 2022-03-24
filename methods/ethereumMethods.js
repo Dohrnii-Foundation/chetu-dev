@@ -191,7 +191,7 @@ module.exports.ethereumMethod = async (req) => {
         coinShortName: "ETH",
         coinValue: Number(senderBalanceInEth),
         coinUsdValue: coinValueUsd,
-        coinStandard: "",
+        coinStandard: "ERC-20",
         blockChain: "ETHEREUM"
        }; 
            } catch(err){
