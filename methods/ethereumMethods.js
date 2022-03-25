@@ -1,9 +1,11 @@
 const Web3 = require('web3');
 const fs = require('fs');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/1e08f56f5e8f46c9be366f614b88f2ef')); // rinkeby test network
+//const web3 = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io/v3/1e08f56f5e8f46c9be366f614b88f2ef')); // rinkeby test network
+const web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/1e08f56f5e8f46c9be366f614b88f2ef')); // ethereum main network
 const { TransactionHistory, validateBlockChainTransfer } = require("../models/transactionHistory");
 const contractabiDHN = JSON.parse(fs.readFileSync("ABIBSCETHPOLY.json",'utf8'));
-const contractAddressDHN = "0x0d7c93752eA82628d9b1270cB49cC435B3701F46";
+//const contractAddressDHN = "0x0d7c93752eA82628d9b1270cB49cC435B3701F46"; //test network
+const contractAddressDHN = "0x32462bA310E447eF34FF0D15BCE8613aa8C4A244"; //main network
 const { WalletAddress } = require("../models/walletAddress");
 const message = require("../lang/message");
 const { coinUsdValue,validateCoinShortNameEthereum } = require("../helper/helper"); 

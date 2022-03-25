@@ -1,9 +1,11 @@
 const Web3 = require('web3');
 const fs = require('fs');
-const web3 = new Web3(new Web3.providers.HttpProvider('https://data-seed-prebsc-1-s1.binance.org:8545')); // bsc test network
+//const web3 = new Web3(new Web3.providers.HttpProvider('https://data-seed-prebsc-1-s1.binance.org:8545')); // bsc test network
+const web3 = new Web3(new Web3.providers.HttpProvider(' https://bsc-dataseed.binance.org/')); // bsc main network
 const { TransactionHistory, validateBlockChainTransfer } = require("../models/transactionHistory");
 const contractabiDHN = JSON.parse(fs.readFileSync("ABIBSCETHPOLY.json",'utf8'));
-const contractAddressDHN = "0xa6dbFb9a95104A6bD622957e5FB9ea7FbdAC8fd4";
+//const contractAddressDHN = "0xa6dbFb9a95104A6bD622957e5FB9ea7FbdAC8fd4"; //test network
+const contractAddressDHN = "0xff8BBc599EA030AA69d0298035dFE263740a95bC"; //main network
 const { WalletAddress } = require("../models/walletAddress");
 const message = require("../lang/message");
 const { coinUsdValue,validateCoinShortNameBsc } = require("../helper/helper"); 

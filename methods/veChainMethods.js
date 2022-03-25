@@ -4,9 +4,10 @@ const fs = require('fs');
 //const web3 = thorify(new Web3(), "https://testnet.veblocks.net/"); // veChain test network
 // const web3 = thorify(new Web3(), "https://sync-testnet.vechain.org/"); // veChain test network
 //const web3 = thorify(new Web3(), "https://sync-testnet.veblocks.net/") // veChain test network
-const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test network
-//const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
-const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";
+//const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test network
+const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
+//const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";  //test network
+const contractAddressVECHAIN = "0x8e57aadF0992AfCC41F7843656C6c7129f738F7b";  //main network
 const contractAbiDHN = JSON.parse(fs.readFileSync("VeChainToken.json",'utf8'));      
 const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
 const { Framework } = require('@vechain/connex-framework');
@@ -46,7 +47,8 @@ module.exports.veChainMethod = async (req) => {
       let walletAddress = addressFrom[0].walletAddress;
       const wallet = new SimpleWallet();
       wallet.import(privateKey);
-      const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
+      //const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+     const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
       const connex = new Framework(Framework.guardDriver(driver))
       if(coinShortName == 'DHN'){
        // const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
@@ -231,7 +233,8 @@ module.exports.veChainGas = async (req) => {
       return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
        
     const wallet = new SimpleWallet();
-    const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet)
+   // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+     const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
     const connex = new Framework(Framework.guardDriver(driver))
     if(coinShortName == 'DHN'){
       //const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
