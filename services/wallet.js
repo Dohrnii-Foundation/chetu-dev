@@ -19,7 +19,7 @@ const veChain = require('../methods/veChainMethods');
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
 //const polygon = require('../methods/polygonMethods');
-//const veChainStak = require('../methods/veChainStaking');
+const veChainStak = require('../methods/veChainStaking');
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -639,7 +639,7 @@ module.exports.walletTransactionHistory = async (req) => {
         const result = await ethereum.ethereumGas(req);
         return result
        }else if(blockChain == 'VECHAIN'){
-        const result = await veChainStak.veChainStaking(req)
+        const result = await veChainStak.veChainStaking(options)
         return result   
        }else if(blockChain == 'BSC'){
         const result = await bsc.bscGas(req)

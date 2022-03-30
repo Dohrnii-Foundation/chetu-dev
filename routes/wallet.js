@@ -132,13 +132,13 @@ router.post("/transactionhistory", async (req, res, next) => {
 /**
  * Implement Staking.
  */
-//  router.post("/staking", async (req, res, next) => {
-//   try {
-//     const result = await wallet.Staking(req);
-//     res.status(result.status || 200).send(result);
-//   } catch (err) {
-//     next(err);
-//   }
-// });
+ router.post("/staking", async (req, res, next) => {
+  try {
+    const result = await wallet.Staking(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
