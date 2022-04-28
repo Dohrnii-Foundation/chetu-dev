@@ -64,13 +64,15 @@ module.exports.ethereumMethod = async (req) => {
          coinName: "Ethereum",
          blockChain: 'ETHEREUM',
          feeCoinShortName: 'ETH',
-         fee: options.fee  
+         fee: options.fee,
+         txId: receipt.transactionHash  
        });
        await transactionHistory.save();
        return {
          result: true,
          status: 200,
          message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+         txId: receipt.transactionHash 
          }; 
        } 
              } catch(err){
@@ -112,13 +114,15 @@ module.exports.ethereumMethod = async (req) => {
          coinName: "Dohrnii",
          blockChain: 'ETHEREUM',
          feeCoinShortName: 'ETH',
-         fee: options.fee 
+         fee: options.fee,
+         txId: receipt.transactionHash 
        });
        await transactionHistory.save();
        return {
          result: true,
          status: 200,
          message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+         txId: receipt.transactionHash 
        };
        }
      }catch(err){
@@ -151,7 +155,7 @@ module.exports.ethereumMethod = async (req) => {
       return {
         result: true,
         status: 200,
-        message: message.FETCH_SUCCESSFULLY,
+        message: message.THIS_TRANSACTION_WILL_COST_YOU,
         gasConsumed: gasInEth,
         gasUnit:'ETH'
        }
@@ -168,7 +172,7 @@ module.exports.ethereumMethod = async (req) => {
      return {
       result: true,
       status: 200,
-      message: message.FETCH_SUCCESSFULLY,
+      message: message.THIS_TRANSACTION_WILL_COST_YOU,
       gasConsumed: gasInEth,
       gasUnit:'ETH'
      }
