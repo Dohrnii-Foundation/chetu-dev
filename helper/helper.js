@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const CoinGecko = require('coingecko-api');
 const bcrypt = require('bcryptjs');
+const axios = require('axios');
 
 module.exports.validateBlockChain = async(option) => {
     let blockChain
@@ -22,6 +23,23 @@ module.exports.validateBlockChain = async(option) => {
         }
         return blockChain
 }
+module.exports.validateStakePeriod = async(option) => {
+    let stakePeriod
+    switch (option.stakePeriod) {
+        case '3M': 
+        stakePeriod = '3M'
+            break;
+        case '6M': 
+        stakePeriod = '6M'
+            break;
+        case '12M': 
+        stakePeriod = '12M'
+            break;   
+        default: 
+        stakePeriod = 'INVALID'
+        }
+        return stakePeriod
+}
 
 module.exports.sendMail = async(option) => {
  
@@ -31,16 +49,16 @@ const transporter = nodemailer.createTransport({
   secure: false,
   requireTLS: true,
   auth: {
-    user: "chetuanmol0801@gmail.com", 
-    pass: "anmols1234", 
+    user: "chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
+    pass: "chetu@5656",//"anmols1234", 
   },
 });
  
 let mailOptions = {
-  from: "chetuanmol0801@gmail.com", 
-  to: 'info@dohrnii.org',//"info@dohrnii.org", 
-  subject: `Query from ${option.walletAddress} user`, 
-  text: `user ${option.usermailId} has send the query:  ${option.message}` // body of email
+  from: "chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
+  to: 'info@dohrnii.org',//"info@dohrnii.org"
+  subject: `Query from Wallet User`, 
+  text: `User ${option.userName} (${option.usermailId}) (${option.walletAddress}) has send the query:  ${option.message}` // body of email
 };
  return new Promise((resolve,reject)=>{
     transporter.sendMail(mailOptions, (error, information) => {
@@ -169,12 +187,43 @@ module.exports.validateWalletRestoreType = async(type)=>{
 module.exports.hashPassword = async(password)=>{
     let salt = bcrypt.genSaltSync(10);
     let hashPassword = bcrypt.hashSync(password, salt);
-    console.log('password;;;',password)
-    console.log('hashpassword;;;',hashPassword)
     return hashPassword
 }
 module.exports.comparePassword = async(password,hash)=>{
     let result = bcrypt.compareSync(password,hash);
-    console.log('result;;;',result)
     return result
 }
+module.exports.signTransaction = (signingService)=>{
+   return new Promise(async(resolve,reject)=>{
+       try{
+        let stakeResponse = await signingService.gas(200000).request();
+         resolve(stakeResponse)
+       }catch(err){
+          // console.log('err in signTransaction function',err.message)
+          reject(err)
+       }
+   })
+}
+module.exports.axiosGet = (url)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+         let stakeResponse = await axios.get(url);
+          resolve(stakeResponse)
+        }catch(err){
+           // console.log('err in axiosGet function',err.message)
+           reject(err)
+        }
+    })
+ }
+ module.exports.verifyUserAddress = (contractStakeDHN,stakeId)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let result = await contractStakeDHN.methods.stakes(stakeId).call();
+           // console.log('stakeVerifyResponse;;',result)
+            resolve(result)
+          }catch(err){
+          //  console.log('err.message;;',err.message)
+            reject(err)
+          }
+    })
+ }
