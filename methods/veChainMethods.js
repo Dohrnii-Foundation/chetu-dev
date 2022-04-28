@@ -15,7 +15,6 @@ const { TransactionHistory, validateBlockChainTransfer } = require("../models/tr
 const { WalletAddress } = require("../models/walletAddress");
 const message = require("../lang/message");
 const { coinUsdValue,validateCoinShortNameVechain } = require("../helper/helper");
-const { Transaction } = require('thor-devkit');
 const CryptoJS = require("crypto-js");
 
 module.exports.veChainMethod = async (req) => {
@@ -72,13 +71,15 @@ module.exports.veChainMethod = async (req) => {
           coinName: "Dohrnii",
           blockChain: 'VECHAIN',
           feeCoinShortName: 'VTHO',
-          fee: options.fee  
+          fee: options.fee,
+          txId: response.txid 
         });
         await transactionHistory.save();
         return {
           result: true,
           status: 200,
           message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+          txId: response.txid
         };
         }
       }catch(err){
@@ -103,7 +104,6 @@ module.exports.veChainMethod = async (req) => {
         const signingService = connex.vendor.sign('tx', [payload]);
         let response = await signingService.request();
         if(response){                
-   
         let transactionHistory = new TransactionHistory({
           walletAddressTo: options.walletAddressTo,
           walletAddressFrom: options.walletAddressFrom,
@@ -111,13 +111,15 @@ module.exports.veChainMethod = async (req) => {
           coinName: "VeChain",
           blockChain: 'VECHAIN',
           feeCoinShortName: 'VTHO',
-          fee: options.fee  
+          fee: options.fee,
+          txId: response.txid 
         });
         await transactionHistory.save();
         return {
           result: true,
           status: 200,
           message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+          txId: response.txid 
         }; 
         }      
            } catch(err){
@@ -149,13 +151,15 @@ module.exports.veChainMethod = async (req) => {
     coinName: "VeThor Token",
     blockChain: 'VECHAIN',
     feeCoinShortName: 'VTHO',
-    fee: options.fee  
+    fee: options.fee,
+    txId: response.txid  
   });
   await transactionHistory.save();
   return {
     result: true,
     status: 200,
     message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+    txId: response.txid
     }; 
   }      
      } catch(err){
@@ -179,48 +183,48 @@ module.exports.veChainGas = async (req) => {
       status: 202,
       message: message.INVALID_WALLET_ADDRESS,
     };
-    let walletAddress = addressFrom[0].walletAddress;
-      const gasPriceCoef = 128
-      const gasLimit = 21000
+    // let walletAddress = addressFrom[0].walletAddress;
+    //   const gasPriceCoef = 128
+    //   const gasLimit = 21000
     if(coinShortName == 'VET'){
-      let gasConsumed = gasLimit * gasPriceCoef
-      let gasInVtho = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
+     // let gasConsumed = gasLimit * gasPriceCoef
+      let gasInVtho = '0.4'//= await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
 
       return {
         result: true,
         status: 200,
-        message: message.FETCH_SUCCESSFULLY,
+        message: message.THIS_TRANSACTION_WILL_COST_YOU,
         gasConsumed: gasInVtho,
         gasUnit:'VTHO'
        }
     } else if(coinShortName == 'VTHO'){
-      let gasConsumed = gasLimit * gasPriceCoef
-      let gasInVtho = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
+     // let gasConsumed = gasLimit * gasPriceCoef
+      let gasInVtho = '0.4'//= await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
      return {
       result: true,
       status: 200,
-      message: message.FETCH_SUCCESSFULLY,
+      message: message.THIS_TRANSACTION_WILL_COST_YOU,
       gasConsumed: gasInVtho,
       gasUnit:'VTHO'
      }
     } else if(coinShortName == 'DHN'){
-      const contractDHN = new web3.eth.Contract(contractAbiDHN,contractAddressVECHAIN, { from: walletAddress });
-      let amountInWei = await web3.utils.toWei((options.amount).toString(), 'ether');
-      let data = contractDHN.methods.transfer(options.walletAddressTo, amountInWei).encodeABI()
-      const clauses =  [{
-        to: options.walletAddressTo,
-        value: options.amount,
-        data: data
-    }]
+    //   const contractDHN = new web3.eth.Contract(contractAbiDHN,contractAddressVECHAIN, { from: walletAddress });
+    //   let amountInWei = await web3.utils.toWei((options.amount).toString(), 'ether');
+    //   let data = contractDHN.methods.transfer(options.walletAddressTo, amountInWei).encodeABI()
+    //   const clauses =  [{
+    //     to: options.walletAddressTo,
+    //     value: options.amount,
+    //     data: data
+    // }]
     // calc intrinsic gas
-    const gasLimit = Transaction.intrinsicGas(clauses)
-    let gasConsumed = gasLimit * gasPriceCoef
-    let gasInVtho = await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
+    // const gasLimit = Transaction.intrinsicGas(clauses)
+    // let gasConsumed = gasLimit * gasPriceCoef
+    let gasInVtho = '0.4'//= await web3.utils.fromWei(web3.utils.toBN(gasConsumed),'ether') 
 
      return {
       result: true,
       status: 200,
-      message: message.FETCH_SUCCESSFULLY,
+      message: message.THIS_TRANSACTION_WILL_COST_YOU,
       gasConsumed: gasInVtho,
       gasUnit:'VTHO'
      }
