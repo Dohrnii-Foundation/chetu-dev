@@ -38,6 +38,9 @@ const TransactionHistory = mongoose.model(
       type: String,
       required: true
     },
+    txId: {
+      type: String
+    },
     date: {
       type: Date,
       default: Date.now,
