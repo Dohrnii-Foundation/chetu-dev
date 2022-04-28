@@ -15,6 +15,9 @@ const Support = mongoose.model(
     email: {
       type: String
     },
+    userName: {
+      type: String
+    },
     date: {
       type: Date,
       default: Date.now,
@@ -26,7 +29,8 @@ function validateMail(request) {
   let { error } = Joi.object({
     message: Joi.string().required(),
     walletAddress: Joi.string().required(),
-    usermailId: Joi.string()
+    usermailId: Joi.string(),
+    userName: Joi.string(),
   }).validate(request);
 
   return error;
