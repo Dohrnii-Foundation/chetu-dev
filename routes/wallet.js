@@ -132,13 +132,58 @@ router.post("/transactionhistory", async (req, res, next) => {
 /**
  * Implement Staking.
  */
- router.post("/staking", async (req, res, next) => {
+ router.post("/stake", async (req, res, next) => {
   try {
-    const result = await wallet.Staking(req);
+    const result = await wallet.Stake(req);
     res.status(result.status || 200).send(result);
   } catch (err) {
     next(err);
   }
 });
+/**
+ * Implement Available token for stake.
+ */
+ router.post("/stake/available/token", async (req, res, next) => {
+  try {
+    const result = await wallet.AvailableTokenForStake(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+/**
+ * Fetch stake token.
+ */
+ router.post("/stake/token/overview", async (req, res, next) => {
+  try {
+    const result = await wallet.StakeTokenOverview(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+/**
+ * Fetch stake token detail.
+ */
+ router.post("/stake/token/detail", async (req, res, next) => {
+  try {
+    const result = await wallet.StakeTokenDetail(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+/**
+ * Implement UnStaking.
+ */
+ router.post("/unstake", async (req, res, next) => {
+  try {
+    const result = await wallet.UnStake(req);
+    res.status(result.status || 200).send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 module.exports = router;
