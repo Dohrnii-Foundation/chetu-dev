@@ -5,21 +5,21 @@ const { validateTransferPayload,
   TransactionHistory,
   validateTransfer,
   validateBlockChainTransfer,validateBlockChainFee  } = require("../models/transactionHistory");
-const { User } = require("../models/user");
+const { Stake } = require("../models/stake");
+const { validateStake,validateUnStake, validateStakeAvailableTokenPayload, validateStakeOveriew,validateStakeDetail } = require('../models/stake')
 const debug = require("debug")("app:walletlog");
 const { Seed } = require("../models/seed");
 const CryptoJS = require("crypto-js");
-const config = require("config");
 const ethers = require('ethers');
 const bip39 = require("bip39");
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
-const { validateWalletRestoreType,validateBlockChain } = require('../helper/helper');
+const { validateWalletRestoreType,validateBlockChain,validateStakePeriod } = require('../helper/helper');
 const veChain = require('../methods/veChainMethods');
+const veChainTemp = require('../methods/veChainStake3M'); //remove when switch to mainnet
 const ethereum = require('../methods/ethereumMethods');
 const bsc = require('../methods/bscMethods');
 //const polygon = require('../methods/polygonMethods');
 const veChainStak = require('../methods/veChainStaking');
+const moment = require('moment');
 /********** Create Wallet ************
  * @param {Object} options
  *
@@ -404,7 +404,8 @@ module.exports.walletTransactionHistory = async (req) => {
                 blockChain: el.blockChain,
                 date: el.date,
                 fee: el.fee,
-                feeCoinShortName: el.feeCoinShortName
+                feeCoinShortName: el.feeCoinShortName,
+                txId: el.txId == undefined ? null : el.txId
               };
             });
   return {
@@ -444,36 +445,35 @@ module.exports.walletTransactionHistory = async (req) => {
             new: true,
           }
         );
-        let walletBalance = await WalletAddress.aggregate([
-          {
-            $match:
-            {'walletAddress': options.walletAddress, }
-          },
-          {
-            $lookup:
-             {
-            from: 'tokens',
-            localField: 'walletAddress',
-            foreignField:'walletAddress',
-            as: 'tokenDataForSum'
-             }
-            },
-            { "$project": {
-              "total": { "$sum": "$tokenDataForSum.coinUsdValue" }
-            }} 
-        ])
+        // let filterValue = []
+        // let tokenValue = await Promise.all([  
+        //                       veChain.veChainToken(options.walletAddress, "DHN"),                      
+        //                       veChain.veChainToken(options.walletAddress, "VET"),
+        //                       veChain.veChainToken(options.walletAddress, "VTHO"),
+        //                       ethereum.ethereumToken(options.walletAddress, "DHN"),
+        //                       ethereum.ethereumToken(options.walletAddress, "ETH"),
+        //                       bsc.bscToken(options.walletAddress, "DHN"),
+        //                       bsc.bscToken(options.walletAddress, "BNB") 
+        //                     ])
+    
+        // for(const el of tokenValue){
+        //   filterValue.push(el.coinUsdValue)
+        // }
+        // let balance = filterValue.reduce((a, b) => a + b, 0) 
   return {
     result: true,
     status: 200,
     message: message.UPDATE_SUCCESSFULLY,
-    data: [
-      {
-        walletAddress: updatedValue.walletAddress,
-        walletName: updatedValue.walletName,
-        qrCode: updatedValue.qrCode,
-        balance: walletBalance[0].total
-      }
-    ]
+    walletAddress: updatedValue.walletAddress,
+    walletName: updatedValue.walletName
+    // data: [
+    //   {
+    //     walletAddress: updatedValue.walletAddress,
+    //     walletName: updatedValue.walletName,
+    //     // qrCode: updatedValue.qrCode,
+    //     // balance: balance
+    //   }
+    // ]
   };
 };
 /**********Restore Wallet ************
@@ -522,7 +522,7 @@ module.exports.walletTransactionHistory = async (req) => {
         return {
           result: true,
           status: 200,
-          message: message.FETCH_SUCCESSFULLY,
+          message: message.WE_HAVE_FOUND_YOUR_WALLET,
           seedId: _id,
           walletAddress: value.walletAddress,
           privateKey: mnemonicWallet.privateKey,
@@ -533,7 +533,7 @@ module.exports.walletTransactionHistory = async (req) => {
       return {
         result: true,
         status: 200,
-        message: message.FETCH_SUCCESSFULLY,
+        message: message.WE_HAVE_FOUND_YOUR_WALLET,
         seedId: wallet[0].seedId,
         walletAddress: wallet[0].walletAddress,
         privateKey: mnemonicWallet.privateKey,
@@ -569,7 +569,7 @@ module.exports.walletTransactionHistory = async (req) => {
         return {
           result: true,
           status: 200,
-          message: message.FETCH_SUCCESSFULLY,
+          message: message.WE_HAVE_FOUND_YOUR_WALLET,
           seedId: _id,
           walletAddress: value.walletAddress,
           privateKey: privateKey,
@@ -579,7 +579,7 @@ module.exports.walletTransactionHistory = async (req) => {
       return {
         result: true,
         status: 200,
-        message: message.FETCH_SUCCESSFULLY,
+        message: message.WE_HAVE_FOUND_YOUR_WALLET,
         seedId: wallet[0].seedId,
         walletAddress: wallet[0].walletAddress,
         privateKey: privateKey,
@@ -619,35 +619,201 @@ module.exports.walletTransactionHistory = async (req) => {
         return result   
        }  
 };
-/********** Staking ************
+/********** Stake ************
  * @param {Object} options
  *
- * @return {Object} Gas Price
+ * @return {Object} Status
  *
- *********** Staking ***********/
- module.exports.Staking = async (req) => {
+ *********** Stake ***********/
+ module.exports.Stake = async (req) => {
   const options = req.body;
-    // const error = validateBlockChainTransfer(options);
-    // if (error)
-    //   return { result: false, status: 202, message: error.details[0].message };
-    console.log('options;;;',options)
+    const error = validateStake(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
       let blockChain  = await validateBlockChain(options)
       if(blockChain == 'INVALID'){
         return { result: false, status: 202, message: message.INVALID_BLOCK_CHAIN };
        }
-       if(blockChain == 'ETHEREUM'){
-        const result = await ethereum.ethereumGas(req);
-        return result
-       }else if(blockChain == 'VECHAIN'){
-        const result = await veChainStak.veChainStaking(options)
+     if(blockChain == 'VECHAIN'){
+        const result = await veChainStak.veChainStake(options)
         return result   
-       }else if(blockChain == 'BSC'){
-        const result = await bsc.bscGas(req)
-       return result   
-       }else if(blockChain == 'POLYGON'){
-        const result = await polygon.polygonGas(req)
-        return result   
-       }  
+       }else {
+        return { result: false, status: 202, message: message.ONLY_SUPPORT_VECHAIN}; 
+       }
+};
+/********** Available Token for Stake ************
+ * @param {Object} options
+ *
+ * @return {Object} options
+ *
+ *********** Available Token for Stake ***********/
+ module.exports.AvailableTokenForStake = async (req) => {
+  const options = req.body;
+    const error = validateStakeAvailableTokenPayload(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
+      const walletDetail = await WalletAddress.find({
+        walletAddress: options.walletAddress,
+      });
+      if (walletDetail.length === 0)
+        return {
+          result: false,
+          status: 202,
+          message: message.INVALID_WALLET_ADDRESS,
+        };
+       // let tokenValue = await veChain.veChainToken(options.walletAddress, "DHN")  Remove comment when switch to mainnet
+        let tokenValue = await veChainTemp.veChainToken(options.walletAddress, "DHN")    
+            return {
+              result: true,
+              status: 200,
+              message: message.FETCH_SUCCESSFULLY,
+              coinUsdValue: tokenValue.coinUsdValue,
+              coinValue: tokenValue.coinValue,
+              coinShortName: tokenValue.coinShortName
+            };                   
+};
+
+/********** Stake Token Overview ************
+ * @param {Object} options
+ *
+ * @return {Object} options
+ *
+ *********** Stake Token Overview ***********/
+ module.exports.StakeTokenOverview = async (req) => {
+  const options = req.body;
+    const error = validateStakeOveriew(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
+      let blockChain  = await validateBlockChain(options)
+      if(blockChain !== 'VECHAIN'){
+        return { result: false, status: 202, message: message.ONLY_SUPPORT_VECHAIN };
+       }
+      const walletDetail = await WalletAddress.find({
+        walletAddress: options.walletAddress
+      });
+      if (walletDetail.length === 0)
+        return {
+          result: false,
+          status: 202,
+          message: message.INVALID_WALLET_ADDRESS,
+        };
+
+        let threeMonth = []
+        let sixMonth = []
+        let twelveMonth = []
+        const stakeDetail = await Stake.find({
+          walletAddress: options.walletAddress, withdraw: false
+        });
+        for(const el of stakeDetail) {
+          if(el.stakePeriod ==='3M'){
+            threeMonth.push(el.token)
+          }else if(el.stakePeriod ==='6M'){
+            sixMonth.push(el.token)
+          }else{
+            twelveMonth.push(el.token)
+          }
+        }
+        let token3M = threeMonth.reduce((a, b) => a + b, 0)
+        let token6M = sixMonth.reduce((a, b) => a + b, 0)
+        let token12M = twelveMonth.reduce((a, b) => a + b, 0)
+            return {
+              result: true,
+              status: 200,
+              message: message.FETCH_SUCCESSFULLY,
+              data: [
+                {
+                  stakePeriod:'3M',
+                  token: token3M,
+                  rewardPercentage: 10,
+                  description: '3 MONTHS STAKING'
+              },
+                {
+                  stakePeriod:'6M',
+                  token: token6M,
+                  rewardPercentage: 15,
+                  description: '6 MONTHS STAKING'
+                },
+                {
+                  stakePeriod:'12M',
+                  token: token12M,
+                  rewardPercentage: 20,
+                  description: '12 MONTHS STAKING'
+                }
+              ]
+            };                   
+};
+
+/********** Stake Token detail ************
+ * @param {Object} options
+ *
+ * @return {Object} options
+ *
+ *********** Stake Token detail ***********/
+ module.exports.StakeTokenDetail = async (req) => {
+  const options = req.body;
+    const error = validateStakeDetail(options);
+    if (error)
+      return { result: false, status: 202, message: error.details[0].message };
+      let blockChain  = await validateBlockChain(options)
+      if(blockChain !== 'VECHAIN'){
+        return { result: false, status: 202, message: message.ONLY_SUPPORT_VECHAIN };
+       }
+       let stakePeriod  = await validateStakePeriod(options)
+       if(stakePeriod == 'INVALID'){
+         return { result: false, status: 202, message: message.INVALID_STAKE_PERIOD };
+        } 
+      const walletDetail = await WalletAddress.find({
+        walletAddress: options.walletAddress
+      });
+      if (walletDetail.length === 0)
+        return {
+          result: false,
+          status: 202,
+          message: message.INVALID_WALLET_ADDRESS,
+        };
+        const stakeDetail = await Stake.find({
+          walletAddress: options.walletAddress, stakePeriod: options.stakePeriod, withdraw: false
+        });
+        // TODO: uncomment it later
+        // let currentDate = Date.now();
+        // console.log('currentDate;;',currentDate)
+        const mappedValue = stakeDetail.map(el=>{
+          return {
+            stakeDbId: el._id,
+            endDate: moment(el.endDate).format('DD/MM/YYYY'),
+            stakeMatured: true, //currentDate >= el.endDate, TODO: uncomment it later
+            token: el.token,
+            stakePeriod: el.stakePeriod
+          }
+        })
+            return {
+              result: true,
+              status: 200,
+              message: message.FETCH_SUCCESSFULLY,
+              data: mappedValue
+            };                   
+};
+/********** UnStake ************
+ * @param {Object} options
+ *
+ * @return {Object} Status
+ *
+ *********** UnStake ***********/
+ module.exports.UnStake = async (req) => {
+  const options = req.body;
+  const error = validateUnStake(options);
+  if (error)
+    return { result: false, status: 202, message: error.details[0].message };
+    let blockChain  = await validateBlockChain(options)
+    if(blockChain == 'INVALID'){
+      return { result: false, status: 202, message: message.INVALID_BLOCK_CHAIN };
+     }
+   if(blockChain == 'VECHAIN'){
+      const result = await veChainStak.veChainUnStake(options)
+      return result   
+     }else {
+      return { result: false, status: 202, message: message.ONLY_SUPPORT_VECHAIN}; 
+     }
 };
 /********** Test Route ************
  * @param {Object} options
