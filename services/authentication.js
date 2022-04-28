@@ -104,7 +104,7 @@ module.exports.validateSeed = async (options) => {
     password: encryptedPassword
   });
   const{ _id } = await user.save();
-  return { result: true, status: 200, userId: _id,message:message.CREATE_SUCCESSFULLY };
+  return { result: true, status: 200, userId: _id, message: options.restore ? message.WALLET_ADDED_SUCCESSFULLY : message.WALLET_CREATED_SUCCESSFULLY };
 };
 
 /********** Login ************
@@ -158,12 +158,12 @@ module.exports.validateSeed = async (options) => {
   let encryptedPassword = await hashPassword(options.newPassword)
   const filter = { _id:  options.userId };
   const update = { password: encryptedPassword};
-  let updatedValue = await User.findOneAndUpdate(
+   await User.findOneAndUpdate(
          filter,
          update,
          {
            new: true,
          }
        );
-  return { result: true, status: 200,message:message.UPDATE_SUCCESSFULLY };
+  return { result: true, status: 200,message:message.PASSWORD_UPDATE_SUCCESSFULLY };
 };
