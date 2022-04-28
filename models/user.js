@@ -24,6 +24,7 @@ function validatePassword(user) {
   let { error } = Joi.object({
     password: Joi.string().required(),
     deviceName: Joi.string().required(),
+    restore: Joi.boolean().required(),
   }).validate(user);
 
   return error;
