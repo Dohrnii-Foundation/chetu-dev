@@ -62,13 +62,15 @@ module.exports.bscMethod = async (req) => {
          coinName: "BNB",
          blockChain: 'BSC',
          feeCoinShortName: 'BNB',
-         fee: options.fee 
+         fee: options.fee,
+         txId: receipt.transactionHash 
        });
        await transactionHistory.save();
        return {
          result: true,
          status: 200,
          message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+         txId: receipt.transactionHash
          }; 
        } 
              } catch(err){
@@ -102,7 +104,6 @@ module.exports.bscMethod = async (req) => {
       const signed = await web3.eth.accounts.signTransaction(payload, privateKey);
       const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
       if(receipt){
- 
       let transactionHistory = new TransactionHistory({
         walletAddressTo: options.walletAddressTo,
         walletAddressFrom: options.walletAddressFrom,
@@ -110,13 +111,15 @@ module.exports.bscMethod = async (req) => {
         coinName: "Dohrnii",
         blockChain: 'BSC',
         feeCoinShortName: 'BNB',
-        fee: options.fee  
+        fee: options.fee,
+        txId: receipt.transactionHash 
       });
       await transactionHistory.save();
       return {
         result: true,
         status: 200,
         message: message.AMOUNT_TRANSFER_SUCCESSFULLY,
+        txId: receipt.transactionHash 
       };
       }
     }catch(err){
@@ -149,7 +152,7 @@ module.exports.bscMethod = async (req) => {
         return {
           result: true,
           status: 200,
-          message: message.FETCH_SUCCESSFULLY,
+          message: message.THIS_TRANSACTION_WILL_COST_YOU,
           gasConsumed: gasInBnb,
           gasUnit:'BNB'
          }
@@ -166,7 +169,7 @@ module.exports.bscMethod = async (req) => {
        return {
         result: true,
         status: 200,
-        message: message.FETCH_SUCCESSFULLY,
+        message: message.THIS_TRANSACTION_WILL_COST_YOU,
         gasConsumed: gasInBnb,
         gasUnit:'BNB'
        }
