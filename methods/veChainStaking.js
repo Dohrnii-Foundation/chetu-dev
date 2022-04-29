@@ -5,7 +5,6 @@ const { validateStakePeriod } = require("../helper/helper");
 const veChainStake3 = require('../methods/veChainStake3M');
 const veChainStake6 = require('../methods/veChainStake6M');
 const veChainStake12 = require('../methods/veChainStake12M');
-const veChainStake3Test = require('../methods/veChainMethods2'); //remove this later
 
 module.exports.veChainStake = async (options) => {
 
