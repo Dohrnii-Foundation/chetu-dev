@@ -463,7 +463,7 @@ module.exports.walletTransactionHistory = async (req) => {
   return {
     result: true,
     status: 200,
-    message: message.UPDATE_SUCCESSFULLY,
+    message: message.WALLET_NAME_UPDATE_SUCCESSFULLY,
     walletAddress: updatedValue.walletAddress,
     walletName: updatedValue.walletName
     // data: [
