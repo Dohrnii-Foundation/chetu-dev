@@ -37,5 +37,6 @@ module.exports = {
   INSUFFICIENT_ENERGY: "Insufficient energy",
   SOMETHING_WENT_WRONG_TRY_AGAIN: "Something went wrong. Please try again",
   PASSWORD_UPDATE_SUCCESSFULLY: "Password has been updated successfully",
-  WALLET_NAME_UPDATE_SUCCESSFULLY: "Wallet name has been updated successfully"
+  WALLET_NAME_UPDATE_SUCCESSFULLY: "Wallet name has been updated successfully",
+  STAKE_PERIOD_NOT_COMPLETED: "Stake period not completed",
 };
