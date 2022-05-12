@@ -774,14 +774,13 @@ module.exports.walletTransactionHistory = async (req) => {
         const stakeDetail = await Stake.find({
           walletAddress: options.walletAddress, stakePeriod: options.stakePeriod, withdraw: false
         });
-        // TODO: uncomment it later
-        // let currentDate = Date.now();
-        // console.log('currentDate;;',currentDate)
+     
+         let currentDate = Date.now();
         const mappedValue = stakeDetail.map(el=>{
           return {
             stakeDbId: el._id,
             endDate: moment(el.endDate).format('DD/MM/YYYY'),
-            stakeMatured: true, //currentDate >= el.endDate, TODO: uncomment it later
+            stakeMatured: currentDate >= el.endDate,
             token: el.token,
             stakePeriod: el.stakePeriod
           }
