@@ -197,9 +197,10 @@ module.exports.signTransaction = (signingService)=>{
    return new Promise(async(resolve,reject)=>{
        try{
         let stakeResponse = await signingService.gas(200000).request();
+       // console.log('stakeResponse in signTransaction function',stakeResponse)
          resolve(stakeResponse)
        }catch(err){
-          // console.log('err in signTransaction function',err.message)
+         //  console.log('err in signTransaction function',err.message)
           reject(err)
        }
    })
@@ -208,9 +209,10 @@ module.exports.axiosGet = (url)=>{
     return new Promise(async(resolve,reject)=>{
         try{
          let stakeResponse = await axios.get(url);
+        // console.log('stakeResponse in axiosGet function',stakeResponse)
           resolve(stakeResponse)
         }catch(err){
-           // console.log('err in axiosGet function',err.message)
+          //  console.log('err in axiosGet function',err.message)
            reject(err)
         }
     })
@@ -219,10 +221,23 @@ module.exports.axiosGet = (url)=>{
     return new Promise(async(resolve,reject)=>{
         try{
             let result = await contractStakeDHN.methods.stakes(stakeId).call();
-           // console.log('stakeVerifyResponse;;',result)
+          //  console.log('result in verifyUserAddress function;;',result)
             resolve(result)
           }catch(err){
-          //  console.log('err.message;;',err.message)
+          // console.log('err in verifyUserAddress function;;',err.message)
+            reject(err)
+          }
+    })
+ }
+
+ module.exports.untilLockingEnd = (contractStakeDHN,stakeId)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let result = await contractStakeDHN.methods.untilLockingEnd(stakeId).call();
+           // console.log('result in untilLockingEnd function;;',result)
+            resolve(result)
+          }catch(err){
+          // console.log('err in untilLockingEnd function;;',err.message)
             reject(err)
           }
     })
