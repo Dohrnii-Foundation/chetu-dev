@@ -12,7 +12,7 @@ const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
 const { Framework } = require('@vechain/connex-framework');
 const { Stake } = require("../models/stake");
 const message = require("../lang/message");
-const { signTransaction,axiosGet,verifyUserAddress } = require("../helper/helper");
+const { signTransaction,axiosGet,verifyUserAddress,untilLockingEnd } = require("../helper/helper");
 const CryptoJS = require("crypto-js");
 const { coinUsdValue,validateCoinShortNameVechain } = require("../helper/helper"); // remove when switch to mainnet
 
@@ -86,33 +86,36 @@ module.exports.veChainStake3M = async (options) => {
       let t1 = approveMethod.asClause(contractAddressStake,amountInWei)
       const signingService = connex.vendor.sign('tx', [t1]);
       let approveResponse = await signTransaction(signingService);
+      console.log('approveResponse;;;',approveResponse)
       if(approveResponse){             
       const stakeMethod = connex.thor.account(contractAddressStake).method(stakeABI);
      let t1 = stakeMethod.asClause(amountInWei)
      const signingService = connex.vendor.sign('tx', [t1]);
      let stakeResponse = await signTransaction(signingService);  
-
+     console.log('stakeResponse;;;',stakeResponse)
      if(stakeResponse){  
-      const currentDate = new Date();
+     // const currentDate = new Date();
       let startTimestamp = Date.now()
-      let maturityTimestamp = startTimestamp + 50//currentDate.setMonth(currentDate.getMonth() + 3); replace it later
+      let maturityTimestamp = startTimestamp + 240000//currentDate.setMonth(currentDate.getMonth() + 3); replace it later
     
      // call swagger API to get Stake length //
       const url = 'http://3.71.71.72:8669/accounts/0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864/storage/0x0000000000000000000000000000000000000000000000000000000000000005'
       let response 
           response = await axiosGet(url);
+          console.log('response.data.value;;;;',response.data.value)
       let stakeId = 0
       if(response.data){
       //  console.log('respnse.data;;;;',response.data)
        // console.log(Number(web3.utils.toBN(response.data.value).toString()) - 1)
         stakeId = Number(web3.utils.toBN(response.data.value).toString()) - 1
-
+       console.log('initial stakeId;;',stakeId)
       // call stakes method to verify the account address //  
       const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
       const iterate = async _ => {
         console.log('Start')
           for(let i=0; i< 10; i++){
             let userDetail = await verifyUserAddress(contractStakeDHN,stakeId)
+            console.log('userDetail.user;;;',userDetail.user)
             if(userDetail.user == walletAddress){
               console.log('user matched')
               break;
@@ -150,11 +153,13 @@ module.exports.veChainStake3M = async (options) => {
               }
          } 
        }
-     } catch (err){          
+     } catch (err){  
+       console.log('err;;;',err)        
       return { result: false, status: 202, message:err.message }
      }    
  } 
  module.exports.veChainUnStake3M = async (options) => {
+  let walletAddress = options.walletAddress 
   let stakePeriod = options.stakePeriod 
   let stakeDbId = options.stakeDbId;
   const stakeDetail = await Stake.find({
@@ -195,6 +200,16 @@ module.exports.veChainStake3M = async (options) => {
             "type": "function"
           }
        try{
+        const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
+        let untilLockingEndResult = await untilLockingEnd(contractStakeDHN,stakeDetail[0].stakeId)
+        console.log('untilLockingEndResult;;;',untilLockingEndResult,typeof(Number(untilLockingEndResult)))
+         if(Number(untilLockingEndResult) != 0)
+         return {
+          result: false,
+          status: 202,
+          message: message.STAKE_PERIOD_NOT_COMPLETED
+        }; 
+
         const unStakeMethod = connex.thor.account(contractAddressStake).method(unStakeABI);
        let t1 = unStakeMethod.asClause(stakeDetail[0].stakeId)
        const signingService = connex.vendor.sign('tx', [t1]);
@@ -203,7 +218,7 @@ module.exports.veChainStake3M = async (options) => {
           // update withdraw status to true
           const filter = { _id:  stakeDbId };
           const update = { withdraw: true};
-          let updatedValue = await Stake.findOneAndUpdate(
+           await Stake.findOneAndUpdate(
                  filter,
                  update,
                  {
