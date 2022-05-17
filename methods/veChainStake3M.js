@@ -1,11 +1,12 @@
 const { thorify } = require('thorify');
 const Web3 = require('web3');
 const fs = require('fs');
-const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test network
-//const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
-const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";  //test network
-//const contractAddressVECHAIN = "0x8e57aadF0992AfCC41F7843656C6c7129f738F7b";  //main network
-const contractAddressStake = "0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864"; //3months //signanture = '0xa694fc3a'
+//const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test network
+const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
+//const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";  //test network
+const contractAddressVECHAIN = "0x8e57aadF0992AfCC41F7843656C6c7129f738F7b";  //main network
+//const contractAddressStake = "0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864"; //3months testnet
+const contractAddressStake = "0x08c73B33115Cafda73371A23A98ee354598A4aBe"; //3months mainnet
 const contractAbiStake = JSON.parse(fs.readFileSync("ABI.json",'utf8'));   
 const contractAbiDHN = JSON.parse(fs.readFileSync("VeChainToken.json",'utf8'));     
 const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
@@ -24,7 +25,8 @@ module.exports.veChainStake3M = async (options) => {
       privateKey = decyptedKey
    const wallet = new SimpleWallet();
       wallet.import(privateKey);
-   const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+   //const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+   const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
    const connex = new Framework(Framework.guardDriver(driver))
      const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
      const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
@@ -86,36 +88,39 @@ module.exports.veChainStake3M = async (options) => {
       let t1 = approveMethod.asClause(contractAddressStake,amountInWei)
       const signingService = connex.vendor.sign('tx', [t1]);
       let approveResponse = await signTransaction(signingService);
-      console.log('approveResponse;;;',approveResponse)
+     // console.log('approveResponse;;;',approveResponse)
       if(approveResponse){             
       const stakeMethod = connex.thor.account(contractAddressStake).method(stakeABI);
      let t1 = stakeMethod.asClause(amountInWei)
      const signingService = connex.vendor.sign('tx', [t1]);
      let stakeResponse = await signTransaction(signingService);  
-     console.log('stakeResponse;;;',stakeResponse)
+    // console.log('stakeResponse;;;',stakeResponse)
      if(stakeResponse){  
      // const currentDate = new Date();
       let startTimestamp = Date.now()
-      let maturityTimestamp = startTimestamp + 240000//currentDate.setMonth(currentDate.getMonth() + 3); replace it later
+      //let maturityTimestamp = startTimestamp + 240000// testnet
+      let maturityTimestamp = startTimestamp + (86400000 * 90)// mainnet
     
      // call swagger API to get Stake length //
-      const url = 'http://3.71.71.72:8669/accounts/0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864/storage/0x0000000000000000000000000000000000000000000000000000000000000005'
+     // const url = 'http://3.71.71.72:8669/accounts/0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // test network
+
+      const url = 'http://3.124.193.149:8669/accounts/0x08c73B33115Cafda73371A23A98ee354598A4aBe/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // mainnet
       let response 
           response = await axiosGet(url);
-          console.log('response.data.value;;;;',response.data.value)
+         // console.log('response.data.value;;;;',response.data.value)
       let stakeId = 0
       if(response.data){
       //  console.log('respnse.data;;;;',response.data)
        // console.log(Number(web3.utils.toBN(response.data.value).toString()) - 1)
         stakeId = Number(web3.utils.toBN(response.data.value).toString()) - 1
-       console.log('initial stakeId;;',stakeId)
+      // console.log('initial stakeId;;',stakeId)
       // call stakes method to verify the account address //  
       const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
       const iterate = async _ => {
         console.log('Start')
           for(let i=0; i< 10; i++){
             let userDetail = await verifyUserAddress(contractStakeDHN,stakeId)
-            console.log('userDetail.user;;;',userDetail.user)
+           // console.log('userDetail.user;;;',userDetail.user)
             if(userDetail.user == walletAddress){
               console.log('user matched')
               break;
@@ -125,7 +130,7 @@ module.exports.veChainStake3M = async (options) => {
                console.log('End')
              }
              await Promise.all([iterate()])
-             console.log('stakeId after promise.all;;;',stakeId)
+            // console.log('stakeId after promise.all;;;',stakeId)
               // check if record already exists
               const stakeRecord = await Stake.find({
                 stakePeriod: options.stakePeriod,
@@ -154,7 +159,7 @@ module.exports.veChainStake3M = async (options) => {
          } 
        }
      } catch (err){  
-       console.log('err;;;',err)        
+      // console.log('err;;;',err)        
       return { result: false, status: 202, message:err.message }
      }    
  } 
@@ -183,7 +188,8 @@ module.exports.veChainStake3M = async (options) => {
         privateKey = decyptedKey
      const wallet = new SimpleWallet();
         wallet.import(privateKey);
-     const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+    // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+     const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
      const connex = new Framework(Framework.guardDriver(driver))
   
       const unStakeABI = {
@@ -202,7 +208,7 @@ module.exports.veChainStake3M = async (options) => {
        try{
         const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
         let untilLockingEndResult = await untilLockingEnd(contractStakeDHN,stakeDetail[0].stakeId)
-        console.log('untilLockingEndResult;;;',untilLockingEndResult,typeof(Number(untilLockingEndResult)))
+       // console.log('untilLockingEndResult;;;',untilLockingEndResult,typeof(Number(untilLockingEndResult)))
          if(Number(untilLockingEndResult) != 0)
          return {
           result: false,
@@ -244,8 +250,8 @@ module.exports.veChainStake3M = async (options) => {
   return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
    
 const wallet = new SimpleWallet();
-const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-// const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
+// const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
+const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
 const connex = new Framework(Framework.guardDriver(driver))
 if(coinShortName == 'DHN'){
   //const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
