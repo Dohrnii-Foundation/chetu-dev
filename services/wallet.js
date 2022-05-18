@@ -821,7 +821,7 @@ module.exports.walletTransactionHistory = async (req) => {
  *
  *********** Test Route ***********/
  module.exports.test = async () => {
-        return { result: true, status: 200, message: "Wallet API works!!!!!!!"};    
+        return { result: true, status: 200, message: "Wallet API works"};    
 };
 /********** Generate QrCode ************
  * @param {Object} address
