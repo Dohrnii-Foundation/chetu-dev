@@ -49,14 +49,14 @@ const transporter = nodemailer.createTransport({
   secure: false,
   requireTLS: true,
   auth: {
-    user: "chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
-    pass: "chetu@5656",//"anmols1234", 
+    user: "wallet@dohrnii.io",//"chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
+    pass: "WALLET4dohrn11!",//"chetu@5656",//"anmols1234", 
   },
 });
  
 let mailOptions = {
-  from: "chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
-  to: 'info@dohrnii.org',//"info@dohrnii.org"
+  from: 'wallet@dohrnii.io',//"chetuindia56@gmail.com",//"chetuanmol0801@gmail.com", 
+  to: 'info@dohrnii.io',//"info@dohrnii.org"
   subject: `Query from Wallet User`, 
   text: `User ${option.userName} (${option.usermailId}) (${option.walletAddress}) has send the query:  ${option.message}` // body of email
 };
@@ -74,42 +74,47 @@ let mailOptions = {
 }
 module.exports.coinUsdValue = async(coin,coinValue)=>{
   let coinUsdValue
-  const CoinGeckoClient = new CoinGecko();
+
+    const CoinGeckoClient = new CoinGecko();
     let price = await CoinGeckoClient.simple.price({
-      ids: ['ethereum', 'vechain', 'vethor-token', 'dai', 'binancecoin', 'matic-network'],
+      ids: ['ethereum', 'vechain', 'vethor-token','binancecoin', 'matic-network'],
       vs_currencies: ['usd'],
   });
-   let obj = {
-     eth: price.data.ethereum.usd,
-     vet: price.data.vechain.usd,
-     vthor: price.data['vethor-token'].usd,
-     dai: price.data.dai.usd,
-     matic: price.data['matic-network'].usd,
-     binancecoin: price.data.binancecoin.usd,
-   }
-   switch (coin) {
-    case 'VET': 
-         coinUsdValue = coinValue * obj.vet
-        break;
-    case 'VTHO': 
-        coinUsdValue = coinValue * obj.vthor
-        break;
-    case 'DHN': 
-        coinUsdValue = 0 //coinValue * obj.dai
-        break;
-    case 'ETH': 
-        coinUsdValue = coinValue * obj.eth
-       break;
-    case 'BNB': 
-       coinUsdValue = coinValue * obj.binancecoin
-       break;
-    case 'MATIC': 
-       coinUsdValue = coinValue * obj.matic
-       break;
-    default: 
-        coinUsdValue = 'INVALID'
-    }
-    return coinUsdValue
+
+        let obj = {
+            eth: price.data.ethereum.usd,
+            vet: price.data.vechain.usd,
+            vthor: price.data['vethor-token'].usd,
+            matic: price.data['matic-network'].usd,
+            binancecoin: price.data.binancecoin.usd,
+        }
+        let val = await axiosGet('https://api.pancakeswap.info/api/v2/tokens/0xff8BBc599EA030AA69d0298035dFE263740a95bC')
+        let dhn = Number(val.data.data.price).toFixed(5)
+
+        switch (coin) {
+            case 'VET': 
+                 coinUsdValue = coinValue * obj.vet
+                break;
+            case 'VTHO': 
+                coinUsdValue = coinValue * obj.vthor
+                break;
+            case 'DHN': 
+                coinUsdValue = coinValue * dhn
+                break;
+            case 'ETH': 
+                coinUsdValue = coinValue * obj.eth
+               break;
+            case 'BNB': 
+               coinUsdValue = coinValue * obj.binancecoin
+               break;
+            case 'MATIC': 
+               coinUsdValue = coinValue * obj.matic
+               break;
+            default: 
+                coinUsdValue = 'INVALID'
+            }
+            return coinUsdValue
+  
 }
 module.exports.validateCoinShortNameVechain = async(coin)=>{
   let coinValue
@@ -205,7 +210,7 @@ module.exports.signTransaction = (signingService)=>{
        }
    })
 }
-module.exports.axiosGet = (url)=>{
+const axiosGet = (url)=>{
     return new Promise(async(resolve,reject)=>{
         try{
          let stakeResponse = await axios.get(url);
@@ -242,3 +247,4 @@ module.exports.axiosGet = (url)=>{
           }
     })
  }
+exports.axiosGet = axiosGet;
