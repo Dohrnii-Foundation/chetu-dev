@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-const CoinGecko = require('coingecko-api');
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 
@@ -75,17 +74,13 @@ let mailOptions = {
 module.exports.coinUsdValue = async(coin,coinValue)=>{
   let coinUsdValue
 
-    const CoinGeckoClient = new CoinGecko();
-    let price = await CoinGeckoClient.simple.price({
-      ids: ['ethereum', 'vechain', 'vethor-token','binancecoin', 'matic-network'],
-      vs_currencies: ['usd'],
-  });
+    let price = await axiosGet(`https://pro-api.coingecko.com/api/v3/simple/price?ids=ethereum,vechain,vethor-token,binancecoin,&vs_currencies=usd&x_cg_pro_api_key=${process.env.COINGECKO_API_KEY}`)
 
         let obj = {
             eth: price.data.ethereum.usd,
             vet: price.data.vechain.usd,
             vthor: price.data['vethor-token'].usd,
-            matic: price.data['matic-network'].usd,
+           // matic: price.data['matic-network'].usd,
             binancecoin: price.data.binancecoin.usd,
         }
         let val = await axiosGet('https://api.pancakeswap.info/api/v2/tokens/0xff8BBc599EA030AA69d0298035dFE263740a95bC')
@@ -248,4 +243,13 @@ const axiosGet = (url)=>{
           }
     })
  }
+
+ module.exports.delay = (msec)=>{
+    return new Promise((resolve)=>{
+      setTimeout(()=>{
+        console.log(`delay function for ${msec} milli second`)
+        resolve(true)
+      },msec)
+    })
+  }
 exports.axiosGet = axiosGet;
