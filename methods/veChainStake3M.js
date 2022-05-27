@@ -15,7 +15,8 @@ const { Stake } = require("../models/stake");
 const message = require("../lang/message");
 const { signTransaction,axiosGet,verifyUserAddress,untilLockingEnd } = require("../helper/helper");
 const CryptoJS = require("crypto-js");
-const { coinUsdValue,validateCoinShortNameVechain } = require("../helper/helper"); // remove when switch to mainnet
+const { coinUsdValue,validateCoinShortNameVechain,delay } = require("../helper/helper"); // remove when switch to mainnet
+const { TransactionHistory } = require("../models/transactionHistory");
 
 module.exports.veChainStake3M = async (options) => {
    let walletAddress = options.walletAddress
@@ -95,16 +96,19 @@ module.exports.veChainStake3M = async (options) => {
      const signingService = connex.vendor.sign('tx', [t1]);
      let stakeResponse = await signTransaction(signingService);  
     // console.log('stakeResponse;;;',stakeResponse)
-     if(stakeResponse){  
+     if(stakeResponse){ 
      // const currentDate = new Date();
       let startTimestamp = Date.now()
       //let maturityTimestamp = startTimestamp + 240000// testnet
       let maturityTimestamp = startTimestamp + (86400000 * 90)// mainnet
+
+        //hold functionality for 11 seconds
+         await delay(11000)
     
      // call swagger API to get Stake length //
      // const url = 'http://3.71.71.72:8669/accounts/0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // test network
 
-      const url = 'http://3.124.193.149:8669/accounts/0x08c73B33115Cafda73371A23A98ee354598A4aBe/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // mainnet
+     const url = 'http://3.124.193.149:8669/accounts/0x08c73B33115Cafda73371A23A98ee354598A4aBe/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // mainnet
       let response 
           response = await axiosGet(url);
          // console.log('response.data.value;;;;',response.data.value)
@@ -130,7 +134,7 @@ module.exports.veChainStake3M = async (options) => {
                console.log('End')
              }
              await Promise.all([iterate()])
-            // console.log('stakeId after promise.all;;;',stakeId)
+           //  console.log('stakeId after promise.all;;;',stakeId)
               // check if record already exists
               const stakeRecord = await Stake.find({
                 stakePeriod: options.stakePeriod,
@@ -150,6 +154,18 @@ module.exports.veChainStake3M = async (options) => {
               token: options.amount
             });
         await stake.save(); 
+        // save stake record in transaction collection
+        let transactionHistory = new TransactionHistory({
+          walletAddressTo: contractAddressStake,
+          walletAddressFrom: options.walletAddress,
+          amount: options.amount,
+          coinName: "Dohrnii",
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: '0.4',
+          txId: stakeResponse.txid 
+        });
+          await transactionHistory.save();
         return {
           result: true,
           status: 200,
@@ -189,7 +205,7 @@ module.exports.veChainStake3M = async (options) => {
      const wallet = new SimpleWallet();
         wallet.import(privateKey);
     // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-     const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
+    const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
      const connex = new Framework(Framework.guardDriver(driver))
   
       const unStakeABI = {
@@ -208,7 +224,7 @@ module.exports.veChainStake3M = async (options) => {
        try{
         const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
         let untilLockingEndResult = await untilLockingEnd(contractStakeDHN,stakeDetail[0].stakeId)
-       // console.log('untilLockingEndResult;;;',untilLockingEndResult,typeof(Number(untilLockingEndResult)))
+  
          if(Number(untilLockingEndResult) != 0)
          return {
           result: false,
@@ -231,6 +247,18 @@ module.exports.veChainStake3M = async (options) => {
                    new: true,
                  }
                );
+            // save unstake record in transaction collection
+         let transactionHistory = new TransactionHistory({
+          walletAddressTo: options.walletAddress,
+          walletAddressFrom: contractAddressStake,
+          amount: stakeDetail[0].token,
+          coinName: "Dohrnii",
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: '0.4',
+          txId: unStakeResponse.txid 
+        });
+        await transactionHistory.save();    
           return {
             result: true,
             status: 200,
@@ -244,7 +272,6 @@ module.exports.veChainStake3M = async (options) => {
  } 
  // Remove when switch to mainnet
  module.exports.veChainToken = async (walletAddress,coinShortName) => {
-
   let coinShortNameReturn = await validateCoinShortNameVechain(coinShortName);
   if(coinShortNameReturn == 'INVALID')
   return{ result: false, status: 202, message: message.INVALID_COIN_SHORT_NAME }
@@ -260,8 +287,10 @@ if(coinShortName == 'DHN'){
   let senderBalance = await balanceOfMethod.call(walletAddress)
   let senderBalanceInVet = await web3.utils.fromWei(web3.utils.toBN(senderBalance.decoded.balance).toString(), 'ether')
 try{
+ // console.log('senderBalanceInVet;;;',senderBalanceInVet)
   let coinBalance = Number(senderBalanceInVet)
-  let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)              
+  let coinValueUsd = await coinUsdValue(coinShortName,coinBalance)  
+ // console.log('coinValueUsd outside;;',coinValueUsd)            
   return {
     coinId: 1,
     coinIcon: "api.dohrniiwallet.ch/dhn.png",
@@ -273,6 +302,7 @@ try{
     blockChain: "VECHAIN"
   };
 }catch(err){
+ // console.log('err;;;',err.message)
   return { result: false, status: 202, message:err.message }
 }      
 } else if(coinShortName == 'VET') {
