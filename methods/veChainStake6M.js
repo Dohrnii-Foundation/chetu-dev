@@ -13,8 +13,9 @@ const { Driver,SimpleWallet,SimpleNet } = require('@vechain/connex-driver');
 const { Framework } = require('@vechain/connex-framework');
 const { Stake } = require("../models/stake");
 const message = require("../lang/message");
-const { signTransaction,axiosGet,verifyUserAddress,untilLockingEnd } = require("../helper/helper");
+const { signTransaction,axiosGet,verifyUserAddress,untilLockingEnd,delay  } = require("../helper/helper");
 const CryptoJS = require("crypto-js");
+const { TransactionHistory } = require("../models/transactionHistory");
 
 module.exports.veChainStake6M = async (options) => {
    let walletAddress = options.walletAddress
@@ -98,6 +99,9 @@ module.exports.veChainStake6M = async (options) => {
       let startTimestamp = Date.now()
      // let maturityTimestamp = startTimestamp + 100000// test network
       let maturityTimestamp = startTimestamp + (86400000 * 183)// main network
+
+       //hold functionality for 11 seconds
+       await delay(11000)
      // call swagger API to get Stake length //
      // const url = 'http://3.71.71.72:8669/accounts/0x9A849566209d78784eC42701DE203D4b9502f2A4/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // test network
 
@@ -145,6 +149,18 @@ module.exports.veChainStake6M = async (options) => {
               token: options.amount
             });
         await stake.save(); 
+         // save stake record in transaction collection
+         let transactionHistory = new TransactionHistory({
+          walletAddressTo: contractAddressStake,
+          walletAddressFrom: options.walletAddress,
+          amount: options.amount,
+          coinName: "Dohrnii",
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: '0.4',
+          txId: stakeResponse.txid 
+        });
+        await transactionHistory.save();
         return {
           result: true,
           status: 200,
@@ -202,7 +218,7 @@ module.exports.veChainStake6M = async (options) => {
        try{
         const contractStakeDHN = new web3.eth.Contract(contractAbiStake,contractAddressStake, { from: walletAddress });
         let untilLockingEndResult = await untilLockingEnd(contractStakeDHN,stakeDetail[0].stakeId)
-       // console.log('untilLockingEndResult;;;',untilLockingEndResult,typeof(Number(untilLockingEndResult)))
+
          if(Number(untilLockingEndResult) != 0)
          return {
           result: false,
@@ -225,6 +241,18 @@ module.exports.veChainStake6M = async (options) => {
                    new: true,
                  }
                );
+          // save unstake record in transaction collection
+         let transactionHistory = new TransactionHistory({
+          walletAddressTo: options.walletAddress,
+          walletAddressFrom: contractAddressStake,
+          amount: stakeDetail[0].token,
+          coinName: "Dohrnii",
+          blockChain: 'VECHAIN',
+          feeCoinShortName: 'VTHO',
+          fee: '0.4',
+          txId: unStakeResponse.txid 
+        });
+        await transactionHistory.save();       
           return {
             result: true,
             status: 200,
