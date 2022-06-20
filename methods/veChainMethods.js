@@ -238,7 +238,7 @@ module.exports.veChainGas = async (req) => {
        
     const wallet = new SimpleWallet();
    // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-     const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
+     const driver = await Driver.connect(new SimpleNet("http://54.93.45.40:8669"),wallet) // main network
     const connex = new Framework(Framework.guardDriver(driver))
     if(coinShortName == 'DHN'){
       //const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
