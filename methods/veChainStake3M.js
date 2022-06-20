@@ -2,7 +2,7 @@ const { thorify } = require('thorify');
 const Web3 = require('web3');
 const fs = require('fs');
 //const web3 = thorify(new Web3(), "http://3.71.71.72:8669/") // veChain test network
-const web3 = thorify(new Web3(), "http://3.124.193.149:8669"); // veChain main network
+const web3 = thorify(new Web3(), "http://54.93.45.40:8669"); // veChain main network
 //const contractAddressVECHAIN = "0x0867dd816763BB18e3B1838D8a69e366736e87a1";  //test network
 const contractAddressVECHAIN = "0x8e57aadF0992AfCC41F7843656C6c7129f738F7b";  //main network
 //const contractAddressStake = "0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864"; //3months testnet
@@ -27,7 +27,7 @@ module.exports.veChainStake3M = async (options) => {
    const wallet = new SimpleWallet();
       wallet.import(privateKey);
    //const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-   const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
+   const driver = await Driver.connect(new SimpleNet("http://54.93.45.40:8669"),wallet) //main network
    const connex = new Framework(Framework.guardDriver(driver))
      const balanceOfABI = { "constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}
      const balanceOfMethod = connex.thor.account(contractAddressVECHAIN).method(balanceOfABI)
@@ -108,7 +108,7 @@ module.exports.veChainStake3M = async (options) => {
      // call swagger API to get Stake length //
      // const url = 'http://3.71.71.72:8669/accounts/0x0e3771a0169d786BC9E6Cc2D2aDcd2bD3f80f864/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // test network
 
-     const url = 'http://3.124.193.149:8669/accounts/0x08c73B33115Cafda73371A23A98ee354598A4aBe/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // mainnet
+     const url = 'http://54.93.45.40:8669/accounts/0x08c73B33115Cafda73371A23A98ee354598A4aBe/storage/0x0000000000000000000000000000000000000000000000000000000000000005' // mainnet
       let response 
           response = await axiosGet(url);
          // console.log('response.data.value;;;;',response.data.value)
@@ -205,7 +205,7 @@ module.exports.veChainStake3M = async (options) => {
      const wallet = new SimpleWallet();
         wallet.import(privateKey);
     // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-    const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) //main network
+    const driver = await Driver.connect(new SimpleNet("http://54.93.45.40:8669"),wallet) //main network
      const connex = new Framework(Framework.guardDriver(driver))
   
       const unStakeABI = {
@@ -278,7 +278,7 @@ module.exports.veChainStake3M = async (options) => {
    
 const wallet = new SimpleWallet();
 // const driver = await Driver.connect(new SimpleNet("http://3.71.71.72:8669/"),wallet) //test network
-const driver = await Driver.connect(new SimpleNet("http://3.124.193.149:8669"),wallet) // main network
+const driver = await Driver.connect(new SimpleNet("http://54.93.45.40:8669"),wallet) // main network
 const connex = new Framework(Framework.guardDriver(driver))
 if(coinShortName == 'DHN'){
   //const walletAddress = "0x5C74975236Cb48582e1959Fa26aEbddDFC2b5920";
